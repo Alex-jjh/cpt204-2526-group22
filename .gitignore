@@ -1,1 +1,11 @@
 .DS_Store
+
+# Build output
+build/
+out/
+*.class
+
+# IDE
+.idea/
+.vscode/
+*.iml
