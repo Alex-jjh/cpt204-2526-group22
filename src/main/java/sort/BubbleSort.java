@@ -13,14 +13,14 @@ public final class BubbleSort implements Sorter {
     @Override
     public <T> void sort(List<T> list, Comparator<? super T> comparator) {
         int n = list.size();
-        for (int i = 0; i < n - 1; i++) {
+        for (int k = 1; k < n; k++) {
             boolean swapped = false;
-            for (int j = 0; j < n - 1 - i; j++) {
-                T a = list.get(j);
-                T b = list.get(j + 1);
-                if (comparator.compare(a, b) > 0) {
-                    list.set(j, b);
-                    list.set(j + 1, a);
+            for (int i = 0; i < n - k; i++) {
+                T current = list.get(i);
+                T next = list.get(i + 1);
+                if (comparator.compare(current, next) > 0) {
+                    list.set(i, next);
+                    list.set(i + 1, current);
                     swapped = true;
                 }
             }
