@@ -81,8 +81,8 @@ public final class Main {
         List<Candidate> authoritative = null;
         for (Sorter s : sorters) {
             SortBenchmark.Result r = bench.run(s, data, Candidate.RANKING);
-            System.out.printf("  %-11s avg %10.3f ms  (%d ns)%n",
-                    r.algorithm(), r.averageMillis(), r.averageNanos());
+            System.out.printf("  %-11s avg %d ms%n",
+                    r.algorithm(), r.averageMillis());
             // all three algorithms must produce the same ranking; use the first
             if (authoritative == null) {
                 authoritative = r.sorted();
