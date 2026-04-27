@@ -311,36 +311,127 @@ Both of you write `Main` together — it's the glue.
 
 ---
 
-## Self-Study Checklist (what you should understand before writing code)
+## Self-Study Checklist — Liang Textbook Reading Map
 
-Tick these off *before* Phase 1; most are in Liang's book or week-by-week
-CPT204 lectures.
+Below is the **exact** mapping from Liang's *Introduction to Java Programming
+and Data Structures* chapters to each project task. Read them in the order
+listed; earlier chapters are prerequisites for later ones.
 
-**Java core**
-- [ ] Interfaces, abstract classes, `final` class/method/field
-- [ ] Generics, bounded type parameters, PECS
-- [ ] `equals` / `hashCode` / `toString` contract
-- [ ] Checked vs unchecked exceptions; `try-with-resources`
-- [ ] `java.util.Comparator` combinators
-- [ ] `java.nio.file` basics
+### Foundation (read before you write any code)
 
-**Algorithms**
-- [ ] Bubble sort, best/avg/worst case, stability
-- [ ] Merge sort, auxiliary memory, stability
-- [ ] Quick sort, pivot strategies, worst-case triggers
-- [ ] Dijkstra's algorithm, why non-negative weights, relaxation
-- [ ] Priority queues / binary heaps (big picture only)
-- [ ] Big-O for all of the above
+These chapters cover the Java basics you'll use everywhere in the project.
+If you're already comfortable with them, skim for review.
 
-**OOP concepts**
-- [ ] Four principles (encapsulation, inheritance, polymorphism,
-      abstraction) — be able to point at **a line in your own code** for
-      each one.
+| Chapter | Title | Why you need it |
+|---|---|---|
+| **Ch 1** | Introduction to Computers, Programs, and Java | Toolchain: compiling, running, JDK vs JRE. |
+| **Ch 2** | Elementary Programming | Variables, types, operators — used in every file. |
+| **Ch 3** | Selections | `if`/`else`, boolean expressions — used in sort comparisons and graph relaxation. |
+| **Ch 4** §4.3–4.4 | Characters and Strings | `String` operations — `location_id` is a String; CSV parsing uses `split`. |
+| **Ch 5** | Loops | `for`/`while` — the backbone of every algorithm. |
+| **Ch 6** | Methods | Defining, calling, overloading — every class has methods. |
+| **Ch 7** §7.1–7.6, 7.11 | Single-Dimensional Arrays | Array basics + sorting arrays intro. We use `ArrayList` but the concepts are the same. |
 
-**Project management**
-- [ ] Basic git workflow: `status`, `add`, `commit`, `push`, `pull`
-- [ ] Writing a conventional commit message
-- [ ] JIRA or Trello basics (for Task D's AI-assisted planning writeup)
+### Task A — Sorting (Phase 1)
+
+| Chapter | Sections | What to focus on | Maps to file |
+|---|---|---|---|
+| **Ch 9** | 9.2–9.5, 9.8–9.9, 9.12 | Defining classes, constructors, visibility modifiers, **encapsulation**, **immutable objects** | `model/Candidate.java` |
+| **Ch 12** | 12.1–12.4, 12.10–12.11 | Exception handling, `try-with-resources`, `File` class, **file I/O** (`Scanner`/`BufferedReader`) | `io/CsvReader.java` |
+| **Ch 13** | 13.2, 13.5–13.8 | **Abstract classes vs interfaces**, `Comparable`, when to use which | `sort/Sorter.java` |
+| **Ch 19** | 19.1–19.4, 19.7 | **Generics**: type parameters `<T>`, bounded wildcards `<? super T>` (PECS) | `sort/Sorter.java` |
+| **Ch 20** | 20.5–20.6 | `List`, **`Comparator` interface** — `comparing`, `reversed`, `thenComparing` | `model/Candidate.RANKING` |
+| **Ch 23** | **23.3** Bubble Sort | Algorithm, early-exit optimization, O(n²) worst / O(n) best, **stability** | `sort/BubbleSort.java` |
+| **Ch 23** | **23.4** Merge Sort | Divide-and-conquer, O(n) auxiliary space, O(n log n) all cases, **stability** | `sort/MergeSort.java` |
+| **Ch 23** | **23.5** Quick Sort | Lomuto/Hoare partition, pivot strategies, O(n²) worst case, **not stable** | `sort/QuickSort.java` |
+| **Ch 22** | 22.2–22.4 | **Big-O notation** — how to analyze and compare algorithm complexity | Report Ch 1 analysis |
+| **Ch 18** | 18.1–18.5, 18.9 | **Recursion** — merge sort and quick sort are recursive; understand base case, call stack, recursion vs iteration | `sort/MergeSort.java`, `sort/QuickSort.java` |
+
+**Key study questions for Task A (answer these before writing the report):**
+- Why does Bubble Sort run in O(n) on Dataset A? → §23.3 + early-exit flag
+- Why does Quick Sort risk O(n²) on already-sorted input? → §23.5 pivot choice
+- Why is Merge Sort the most consistent? → §23.4 always O(n log n)
+- What's the memory trade-off? → §23.4 (O(n) extra) vs §23.3/23.5 (in-place)
+
+### Task B — Graph / Shortest Path (Phase 2)
+
+| Chapter | Sections | What to focus on | Maps to file |
+|---|---|---|---|
+| **Ch 9** | 9.12 | Immutable objects (same pattern as Candidate) | `model/Edge.java` |
+| **Ch 21** | 21.5–21.6 | **`HashMap`** — used for the adjacency list `Map<String, List<Arc>>` | `graph/Graph.java` |
+| **Ch 20** | 20.10 | **Priority queues** — binary heap, `PriorityQueue` class | `graph/DijkstraShortestPath.java` |
+| **Ch 28** | 28.1–28.4, 28.6–28.9 | **Graph basics**: terminology, adjacency list vs matrix, **DFS**, **BFS** | `graph/Graph.java`, Report Ch 2 analysis |
+| **Ch 29** | **29.1–29.3**, **29.5** | **Weighted graphs**, `WeightedGraph` class, **Dijkstra's shortest path** — relaxation, non-negative weights, complexity O((V+E) log V) | `graph/DijkstraShortestPath.java` |
+| **Ch 13** | 13.5 (interfaces), 13.8 (interfaces vs abstract classes) | `ShortestPathFinder` interface + default method `findVia` | `graph/ShortestPathFinder.java` |
+
+**Key study questions for Task B:**
+- Why does Dijkstra require non-negative weights? → §29.5 (it commits distances on pop; a later negative edge could invalidate that)
+- What's the complexity? → O((V+E) log V) with binary heap
+- If the graph were unweighted, what would you use instead? → BFS (§28.9), O(V+E)
+- Does segment-wise optimal = globally optimal? → No. Build a 4-node counter-example on paper.
+- What if the graph were much larger / had coordinates? → A* (mention as extension; not in textbook but worth a sentence in the report)
+
+### Task C — OOP Design (Phase 4)
+
+| Chapter | Sections | What to focus on | Report topic |
+|---|---|---|---|
+| **Ch 9** | 9.8–9.9, 9.12 | **Encapsulation**: private fields, getters, immutable classes | `Candidate`, `Edge`, `PathResult` are all immutable |
+| **Ch 10** | 10.2–10.4 | **Class abstraction**, thinking in objects, class relationships (association, aggregation, dependency) | UML class diagram, how `Main` depends on `Sorter` and `ShortestPathFinder` |
+| **Ch 11** | 11.2–11.8, 11.10 | **Inheritance and polymorphism**: superclass/subclass, method overriding, **dynamic binding** | Three `Sorter` implementations dispatched polymorphically in `Main` |
+| **Ch 13** | 13.2, 13.5, 13.8 | **Abstract classes and interfaces**: when to use each, design trade-offs | `Sorter` interface, `ShortestPathFinder` interface |
+| **Ch 20** | 20.2, 20.5 | **Collections framework**: `List`, `ArrayList` — why we chose them for candidate data | Data structure justification |
+| **Ch 21** | 21.5 | **Maps**: `HashMap` for adjacency list | Data structure justification |
+
+**What to write in the report:**
+- For each OOP principle, point to **a specific line** in your code. Don't just say "we used encapsulation" — say "Candidate's fields are `private final`, exposed only through getters (§9.9), making the object immutable (§9.12)."
+- Draw one UML class diagram showing all classes and their relationships.
+
+### Task D — Reflection (Phase 6, your own writing)
+
+No specific Liang chapters — this is about your experience. But for the
+EDI section, think about:
+
+| Topic | Possible angle |
+|---|---|
+| Accessibility | Text-to-speech for visually impaired users (mention Java's `javax.accessibility`) |
+| Internationalization | Location IDs could be multilingual; `Locale`-aware formatting |
+| Colour-blind safety | If you add any visualization, use a colour-blind-safe palette |
+
+### Quick-Reference: Chapter → Task Matrix
+
+| Liang Chapter | Task A | Task B | Task C | Notes |
+|---|---|---|---|---|
+| Ch 1–7 (Java basics) | ✓ | ✓ | ✓ | Foundation for everything |
+| Ch 9 (Objects & Classes) | ✓ | ✓ | ✓ | `Candidate`, `Edge`, immutability |
+| Ch 10 (OO Thinking) | | | ✓ | Class abstraction, relationships |
+| Ch 11 (Inheritance & Polymorphism) | ✓ | | ✓ | `Sorter` polymorphism, dynamic binding |
+| Ch 12 (Exceptions & Text I/O) | ✓ | ✓ | | CSV reading, error handling |
+| Ch 13 (Abstract Classes & Interfaces) | ✓ | ✓ | ✓ | `Sorter`, `ShortestPathFinder` |
+| Ch 18 (Recursion) | ✓ | | | Merge sort, quick sort recursion |
+| Ch 19 (Generics) | ✓ | | ✓ | `Sorter<T>`, bounded wildcards |
+| Ch 20 (Lists, Queues, PQ) | ✓ | ✓ | ✓ | `ArrayList`, `Comparator`, `PriorityQueue` |
+| Ch 21 (Sets & Maps) | | ✓ | ✓ | `HashMap` for adjacency list |
+| Ch 22 (Efficient Algorithms) | ✓ | | | Big-O analysis |
+| Ch 23 (Sorting) | ✓ | | | Bubble §23.3, Merge §23.4, Quick §23.5 |
+| Ch 28 (Graphs) | | ✓ | | Graph basics, BFS, DFS |
+| Ch 29 (Weighted Graphs) | | ✓ | | Dijkstra §29.5 |
+
+### Suggested Reading Order (most efficient path)
+
+If you're short on time, read in this order — each step unlocks the next:
+
+1. **Ch 9** (Objects & Classes) — unlocks writing `Candidate`, `Edge`
+2. **Ch 12 §12.10–12.11** (File I/O) — unlocks `CsvReader`
+3. **Ch 13 §13.5–13.8** (Interfaces) — unlocks `Sorter`, `ShortestPathFinder`
+4. **Ch 19 §19.1–19.4** (Generics) — unlocks the `<T>` in `Sorter.sort()`
+5. **Ch 20 §20.5–20.6** (Lists & Comparator) — unlocks `Candidate.RANKING`
+6. **Ch 18 §18.1–18.5** (Recursion) — unlocks merge sort / quick sort
+7. **Ch 23 §23.3–23.5** (Sorting algorithms) — **core of Task A**
+8. **Ch 22 §22.2–22.4** (Big-O) — unlocks the analysis section
+9. **Ch 21 §21.5** (Maps) — unlocks `Graph` adjacency list
+10. **Ch 28 §28.1–28.4, 28.6–28.9** (Graphs, BFS, DFS) — graph foundations
+11. **Ch 29 §29.1–29.3, 29.5** (Weighted graphs, Dijkstra) — **core of Task B**
+12. **Ch 10, Ch 11** (OO Thinking, Inheritance) — unlocks Task C writeup
 
 ---
 
