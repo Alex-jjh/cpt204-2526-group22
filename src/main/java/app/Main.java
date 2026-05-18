@@ -81,7 +81,7 @@ public final class Main {
         List<Candidate> authoritative = null;
         for (Sorter s : sorters) {
             SortBenchmark.Result r = bench.run(s, data, Candidate.RANKING);
-            System.out.printf("  %-11s avg %d ms%n",
+            System.out.printf("  %-11s avg %.3f ms%n",
                     r.algorithm(), r.averageMillis());
             // all three algorithms must produce the same ranking; use the first
             if (authoritative == null) {
@@ -111,10 +111,9 @@ public final class Main {
     }
 
     private static String formatCost(double cost) {
-        if (cost == Math.floor(cost) && !Double.isInfinite(cost)) {
-            return Long.toString((long) cost);
-        }
-        return Double.toString(cost);
+        if (Double.isInfinite(cost)) return "inf";
+        if (cost == Math.floor(cost)) return Long.toString((long) cost);
+        return String.format("%.3f", cost);
     }
 
     private Main() {}
