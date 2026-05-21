@@ -1,0 +1,947 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>CPT204 Group 22 — Urban Infrastructure Inspection System</title>
+<style>
+  :root {
+    --bg: #0f172a;
+    --bg-2: #1e293b;
+    --fg: #e2e8f0;
+    --muted: #94a3b8;
+    --accent: #38bdf8;
+    --accent-2: #fbbf24;
+    --good: #4ade80;
+    --bad: #f87171;
+    --pivot: #f472b6;
+  }
+
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0;
+    width: 100vw; height: 100vh;
+    overflow: hidden;
+    font-family: 'Inter', 'Segoe UI', -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--fg);
+  }
+
+  .slide {
+    position: absolute; inset: 0;
+    padding: 4vh 6vw;
+    display: none;
+    flex-direction: column;
+    overflow: hidden;
+    animation: fadeIn 0.5s ease;
+  }
+  .slide.active { display: flex; }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  h1 { font-size: 3.4em; margin: 0 0 0.2em 0; line-height: 1.1; }
+  h2 { font-size: 2.2em; margin: 0 0 0.4em 0; color: var(--accent); }
+  h3 { font-size: 1.3em; margin: 0.6em 0 0.2em; color: var(--accent-2); }
+  p, li { font-size: 1.15em; line-height: 1.55; }
+  .muted { color: var(--muted); }
+  .accent { color: var(--accent); }
+  .accent-2 { color: var(--accent-2); }
+  .good { color: var(--good); }
+  .bad { color: var(--bad); }
+  code, .mono {
+    font-family: 'JetBrains Mono', 'Fira Code', Consolas, monospace;
+    background: rgba(56, 189, 248, 0.12);
+    padding: 1px 6px; border-radius: 4px;
+    font-size: 0.92em;
+  }
+
+  /* Navigation */
+  .nav {
+    position: fixed;
+    bottom: 16px; right: 22px;
+    display: flex; gap: 10px;
+    z-index: 100;
+  }
+  .nav button {
+    background: var(--bg-2);
+    border: 1px solid var(--muted);
+    color: var(--fg);
+    padding: 6px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 1em;
+  }
+  .nav button:hover { background: var(--accent); color: var(--bg); }
+  .pageno {
+    position: fixed;
+    bottom: 18px; left: 22px;
+    color: var(--muted);
+    font-size: 0.95em;
+    z-index: 100;
+  }
+  .speaker-tag {
+    position: absolute;
+    top: 18px; right: 22px;
+    background: var(--bg-2);
+    border-left: 3px solid var(--accent);
+    padding: 4px 10px;
+    font-size: 0.85em;
+    border-radius: 3px;
+    color: var(--muted);
+  }
+  .speaker-tag.alex   { border-color: var(--accent); }
+  .speaker-tag.tm     { border-color: var(--accent-2); }
+
+  /* Two-column layout */
+  .cols {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4vw;
+    flex: 1;
+    min-height: 0;
+  }
+  .cols.three { grid-template-columns: 1fr 1fr 1fr; }
+
+  /* Cover slide */
+  .cover {
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    background: radial-gradient(circle at 30% 20%, rgba(56,189,248,0.15), transparent 60%),
+                radial-gradient(circle at 70% 80%, rgba(251,191,36,0.10), transparent 60%);
+  }
+  .cover h1 { font-size: 4.5em; }
+  .cover .sub { font-size: 1.5em; color: var(--muted); margin-top: 1em; }
+  .cover .meta { margin-top: 3em; font-size: 1em; color: var(--muted); letter-spacing: 0.1em; }
+
+  /* Tables */
+  table {
+    border-collapse: collapse;
+    width: 100%;
+    font-size: 1em;
+  }
+  th, td {
+    border: 1px solid var(--bg-2);
+    padding: 7px 10px;
+    text-align: left;
+  }
+  th { background: var(--bg-2); color: var(--accent); }
+  tr:nth-child(odd) td { background: rgba(30,41,59,0.4); }
+
+  /* Cards */
+  .card {
+    background: var(--bg-2);
+    padding: 16px 20px;
+    border-radius: 8px;
+    border-left: 4px solid var(--accent);
+    margin-bottom: 14px;
+  }
+  .card.win   { border-color: var(--good); }
+  .card.lose  { border-color: var(--bad); }
+  .card.note  { border-color: var(--accent-2); }
+
+  /* === Bubble Sort Animation === */
+  .bars {
+    display: flex;
+    gap: 4px;
+    align-items: flex-end;
+    height: 220px;
+    margin-top: 18px;
+    padding: 0 10px;
+  }
+  .bar {
+    flex: 1;
+    background: var(--accent);
+    border-radius: 4px 4px 0 0;
+    transition: all 0.5s cubic-bezier(0.5, 0, 0.5, 1);
+    position: relative;
+    color: var(--bg);
+    text-align: center;
+    font-weight: 600;
+    font-size: 0.85em;
+    padding-top: 4px;
+  }
+  .bar.compare { background: var(--accent-2); }
+  .bar.swap    { background: var(--bad); }
+  .bar.sorted  { background: var(--good); }
+  .bar.pivot   { background: var(--pivot); }
+
+  .anim-controls {
+    display: flex; gap: 10px;
+    margin-top: 12px; align-items: center;
+  }
+  .anim-controls button {
+    background: var(--accent);
+    color: var(--bg);
+    border: none;
+    padding: 8px 18px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+  }
+  .anim-controls button:hover { background: var(--accent-2); }
+  .anim-status {
+    margin-left: 14px;
+    color: var(--muted);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.9em;
+  }
+
+  /* === Graph SVG === */
+  .graph-svg {
+    width: 100%;
+    max-height: 60vh;
+    background: var(--bg-2);
+    border-radius: 8px;
+  }
+  .graph-svg circle.node {
+    fill: var(--bg);
+    stroke: var(--accent);
+    stroke-width: 2;
+    transition: all 0.5s ease;
+  }
+  .graph-svg circle.node.frontier { fill: var(--accent-2); stroke: var(--accent-2); }
+  .graph-svg circle.node.settled  { fill: var(--good); stroke: var(--good); }
+  .graph-svg circle.node.start    { fill: var(--accent); stroke: var(--accent); }
+  .graph-svg circle.node.end      { fill: var(--bad); stroke: var(--bad); }
+  .graph-svg line.edge {
+    stroke: var(--muted);
+    stroke-width: 1.5;
+    transition: all 0.5s ease;
+  }
+  .graph-svg line.edge.relax  { stroke: var(--accent-2); stroke-width: 3; }
+  .graph-svg line.edge.path   { stroke: var(--good); stroke-width: 4; }
+  .graph-svg text {
+    fill: var(--fg);
+    font-size: 12px;
+    font-family: 'JetBrains Mono', monospace;
+    pointer-events: none;
+    text-anchor: middle;
+  }
+  .graph-svg text.weight {
+    fill: var(--muted);
+    font-size: 10px;
+  }
+
+  /* Code blocks */
+  pre.code {
+    background: #0a1020;
+    border: 1px solid var(--bg-2);
+    border-radius: 6px;
+    padding: 14px 18px;
+    overflow: auto;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.95em;
+    line-height: 1.5;
+  }
+  pre.code .kw    { color: #c084fc; }
+  pre.code .str   { color: var(--good); }
+  pre.code .com   { color: var(--muted); font-style: italic; }
+  pre.code .num   { color: var(--accent-2); }
+  pre.code .hl    { background: rgba(251,191,36,0.15); }
+
+  /* UML mini boxes */
+  .uml-row {
+    display: flex; gap: 12px; flex-wrap: wrap;
+    margin-top: 14px;
+  }
+  .uml-box {
+    background: var(--bg-2);
+    border: 1.5px solid var(--accent);
+    padding: 10px 14px;
+    border-radius: 6px;
+    min-width: 140px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.85em;
+  }
+  .uml-box .uml-name { color: var(--accent-2); font-weight: 700; margin-bottom: 6px; }
+  .uml-box.iface { border-style: dashed; }
+  .uml-box.iface .uml-name::before { content: "« interface »\A"; white-space: pre; color: var(--muted); font-size: 0.75em; }
+
+  /* Stats grid */
+  .stat-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+    margin: 12px 0;
+  }
+  .stat {
+    background: var(--bg-2);
+    padding: 14px;
+    border-radius: 8px;
+    text-align: center;
+  }
+  .stat .num {
+    font-size: 2.4em;
+    font-weight: 700;
+    color: var(--accent);
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .stat .lbl { color: var(--muted); font-size: 0.95em; }
+
+  ul { padding-left: 1.4em; }
+  ul li { margin-bottom: 0.3em; }
+
+  .footnote {
+    font-size: 0.85em;
+    color: var(--muted);
+    margin-top: 1em;
+    font-style: italic;
+  }
+</style>
+</head>
+<body>
+
+<!-- ================= 1. Cover ================= -->
+<div class="slide cover active" data-slide="1">
+  <h1>Urban Infrastructure<br>Inspection System</h1>
+  <div class="sub">CPT204 Advanced Object-Oriented Programming · Group 22</div>
+  <div class="meta">
+    Alex (lead Task C / D) &nbsp;·&nbsp; Teammate (lead Task A / B)<br>
+    May 2026
+  </div>
+</div>
+
+<!-- ================= 2. Project Intro ================= -->
+<div class="slide" data-slide="2">
+  <span class="speaker-tag tm">Speaker: Teammate &nbsp;|&nbsp; 0:30</span>
+  <h2>The Problem</h2>
+  <p>A municipality has <span class="accent-2">1000 candidate inspection points</span> connected by <span class="accent-2">2600 road segments</span>. The inspection team has limited capacity and needs to answer two questions:</p>
+  <div class="cols">
+    <div class="card win">
+      <h3>① Which 10 to inspect first?</h3>
+      <p>Each location has a <span class="mono">priority_score</span>. <strong>Sort</strong> all candidates by priority (descending), then ID (ascending), and pick the top 10.</p>
+      <p class="footnote">→ Task A: Bubble vs Quick vs Merge</p>
+    </div>
+    <div class="card win">
+      <h3>② What's the cheapest route?</h3>
+      <p>Given a start and end (and optional waypoints), find the <strong>shortest weighted path</strong> through the road graph.</p>
+      <p class="footnote">→ Task B: Dijkstra over an adjacency list</p>
+    </div>
+  </div>
+  <div class="stat-grid">
+    <div class="stat"><div class="num">1000</div><div class="lbl">nodes (V)</div></div>
+    <div class="stat"><div class="num">2600</div><div class="lbl">edges (E)</div></div>
+    <div class="stat"><div class="num">3</div><div class="lbl">datasets · 4 path cases</div></div>
+  </div>
+</div>
+
+<!-- ================= 3. Task A intro ================= -->
+<div class="slide" data-slide="3">
+  <span class="speaker-tag tm">Speaker: Teammate &nbsp;|&nbsp; 0:30</span>
+  <h2>Task A — Three sorts, three datasets</h2>
+  <div class="cols three">
+    <div class="card">
+      <h3>Bubble Sort</h3>
+      <p>Adjacent compare-and-swap. Liang's <strong>early-exit flag</strong>: stop the moment a pass does no swaps.</p>
+      <p class="mono accent">best O(n) · avg O(n²)</p>
+    </div>
+    <div class="card">
+      <h3>Quick Sort</h3>
+      <p>Lomuto partition with <strong>median-of-three</strong> pivot to dodge the O(n²) worst case on sorted input.</p>
+      <p class="mono accent">avg O(n log n)</p>
+    </div>
+    <div class="card">
+      <h3>Merge Sort</h3>
+      <p>Top-down divide-and-conquer. <strong>Stable</strong> in all cases; trades O(n) extra space for predictable speed.</p>
+      <p class="mono accent">always O(n log n)</p>
+    </div>
+  </div>
+  <p>The three datasets are <strong>not interchangeable</strong> — each was crafted to expose a different algorithmic strength:</p>
+  <table>
+    <thead><tr><th>Dataset</th><th>Shape</th><th>Hypothesis</th></tr></thead>
+    <tbody>
+      <tr><td><span class="mono">A</span></td><td>nearly sorted</td><td>Bubble's early-exit should win</td></tr>
+      <tr><td><span class="mono">B</span></td><td>random</td><td>Quick should dominate (cache-friendly)</td></tr>
+      <tr><td><span class="mono">C</span></td><td>many ties</td><td>Merge's stability matters here</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ================= 4. Bubble Sort animation ================= -->
+<div class="slide" data-slide="4">
+  <span class="speaker-tag tm">Speaker: Teammate &nbsp;|&nbsp; 1:00</span>
+  <h2>Bubble Sort, animated</h2>
+  <p class="muted">Click <strong>Step</strong> to walk through one comparison; <strong>Auto</strong> to play the whole sort. Yellow = comparing · Red = swapping · Green = sorted.</p>
+  <div class="bars" id="bubble-bars"></div>
+  <div class="anim-controls">
+    <button onclick="bubbleStep()">Step</button>
+    <button onclick="bubbleAuto()">Auto</button>
+    <button onclick="bubbleReset()">Reset</button>
+    <span class="anim-status" id="bubble-status">Pass 1 of n−1 · ready</span>
+  </div>
+  <p class="footnote">After a full pass with zero swaps, <span class="mono">swapped == false</span> → return early. That's the line that lets Bubble win on Dataset A in 0.103 ms.</p>
+</div>
+
+<!-- ================= 5. Quick Sort animation ================= -->
+<div class="slide" data-slide="5">
+  <span class="speaker-tag tm">Speaker: Teammate &nbsp;|&nbsp; 0:50</span>
+  <h2>Quick Sort, animated</h2>
+  <p class="muted">Pink = pivot (median-of-three) · Yellow = current scan element · Red = swap with partition boundary.</p>
+  <div class="bars" id="quick-bars"></div>
+  <div class="anim-controls">
+    <button onclick="quickStep()">Step</button>
+    <button onclick="quickAuto()">Auto</button>
+    <button onclick="quickReset()">Reset</button>
+    <span class="anim-status" id="quick-status">ready</span>
+  </div>
+  <p class="footnote">Median-of-three: we take <span class="mono">arr[lo]</span>, <span class="mono">arr[mid]</span>, <span class="mono">arr[hi]</span>, sort those three, and place the median at <span class="mono">arr[hi]</span> as the pivot — this is what dodges O(n²) on sorted input.</p>
+</div>
+
+<!-- ================= 6. Task A results ================= -->
+<div class="slide" data-slide="6">
+  <span class="speaker-tag tm">Speaker: Teammate &nbsp;|&nbsp; 1:00</span>
+  <h2>Task A — Results (n = 1000, avg of 3 runs)</h2>
+  <table>
+    <thead><tr><th>Algorithm</th><th>Dataset A (sorted)</th><th>Dataset B (random)</th><th>Dataset C (ties)</th></tr></thead>
+    <tbody>
+      <tr><td>Bubble Sort</td><td class="good">0.103 ms ⭐</td><td class="bad">3.169 ms</td><td>0.748 ms</td></tr>
+      <tr><td>Quick Sort</td><td>0.159 ms</td><td class="good">0.072 ms ⭐</td><td>0.144 ms</td></tr>
+      <tr><td>Merge Sort</td><td>0.176 ms</td><td>0.216 ms</td><td class="good">0.123 ms ⭐</td></tr>
+    </tbody>
+  </table>
+  <h3 style="margin-top:1em">Key observation</h3>
+  <p><strong>Each algorithm wins exactly one dataset</strong> — and each win matches our pre-experimental hypothesis. That alignment is what makes this benchmark scientific rather than just a horse race.</p>
+  <div class="card note">
+    <strong>Methodology safeguards (per tutor's brief):</strong> 1 untimed warm-up to absorb JIT compilation · 3 timed runs · <span class="mono">System.nanoTime()</span> for sub-millisecond precision · fresh copy of the input list per run so in-place sorters don't see pre-sorted data.
+  </div>
+</div>
+
+<!-- ================= 7. Graph & Dijkstra animation ================= -->
+<div class="slide" data-slide="7">
+  <span class="speaker-tag alex">Speaker: Alex &nbsp;|&nbsp; 1:00</span>
+  <h2>Task B — How Dijkstra explores</h2>
+  <p class="muted">Blue = start · Red = end · Yellow = frontier (in heap) · Green = settled.</p>
+  <svg class="graph-svg" id="dijkstra-svg" viewBox="0 0 800 400" preserveAspectRatio="xMidYMid meet"></svg>
+  <div class="anim-controls">
+    <button onclick="dijkstraStep()">Step</button>
+    <button onclick="dijkstraAuto()">Auto</button>
+    <button onclick="dijkstraReset()">Reset</button>
+    <span class="anim-status" id="dijkstra-status">ready · 7 nodes, 9 edges</span>
+  </div>
+  <p class="footnote">At each step we <span class="mono">poll()</span> the cheapest frontier node and <strong>relax</strong> its neighbours. The Java <span class="mono">PriorityQueue</span> is the binary heap that makes this O((V+E) log V) instead of textbook O(V²).</p>
+</div>
+
+<!-- ================= 8. Task B 4 cases ================= -->
+<div class="slide" data-slide="8">
+  <span class="speaker-tag alex">Speaker: Alex &nbsp;|&nbsp; 1:00</span>
+  <h2>Task B — Required output</h2>
+  <table>
+    <thead><tr><th>Case</th><th>Start → End (via)</th><th>Cost</th><th>Length</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td>L0001 → L0001</td><td class="good">0</td><td>1 (self-loop)</td></tr>
+      <tr><td>2</td><td>L0001 → L0010</td><td>27</td><td>8 hops</td></tr>
+      <tr><td>3</td><td>L0001 → L0101 (via L0105)</td><td>39</td><td>15 hops</td></tr>
+      <tr><td>4</td><td>L0001 → L0201 (via L0105, L0205)</td><td>48</td><td>18 hops</td></tr>
+    </tbody>
+  </table>
+  <div class="card note">
+    <h3>Look at Case 3 carefully</h3>
+    <p>The path retraces: <span class="mono">… → L0106 → L0105 → L0106 → L0107 → …</span></p>
+    <p>This is the <strong>local-vs-global optimality</strong> evidence. We compose two Dijkstra calls (start → waypoint, waypoint → end). Each leg is locally optimal, but the concatenation can backtrack — because Dijkstra knows nothing about the other leg's geometry. A correct globally-optimal solver for k waypoints is the <span class="mono">k-shortest-paths</span> / TSP-with-waypoints variant; out of scope here, but discussed in §2.4 of the report.</p>
+  </div>
+</div>
+
+<!-- ================= 9. Why Dijkstra (complexity) ================= -->
+<div class="slide" data-slide="9">
+  <span class="speaker-tag alex">Speaker: Alex &nbsp;|&nbsp; 0:40</span>
+  <h2>Why Dijkstra + heap, not adjacency matrix</h2>
+  <table>
+    <thead><tr><th>Approach</th><th>Time</th><th>Space</th><th>For V=1000, E=2600</th></tr></thead>
+    <tbody>
+      <tr><td>Textbook Dijkstra (matrix scan)</td><td>O(V²)</td><td>O(V²)</td><td>~10⁶ ops · 1 MB matrix</td></tr>
+      <tr><td>Floyd-Warshall (all pairs)</td><td>O(V³)</td><td>O(V²)</td><td>~10⁹ ops</td></tr>
+      <tr class="good"><td><strong>Ours: PQ-Dijkstra + adjacency list</strong></td><td><strong>O((V+E) log V)</strong></td><td><strong>O(V+E)</strong></td><td><strong>~36 000 ops</strong></td></tr>
+    </tbody>
+  </table>
+  <p style="margin-top:1em"><strong>Sparsity matters.</strong> Our graph has 2600 edges out of a possible ~500 000 — that's 0.5 % density. An adjacency matrix would be <strong>192× wasteful</strong> in space, and the dense scan in textbook Dijkstra would touch 1000 cells per node even when only ~5 are real neighbours.</p>
+  <h3>Alternatives we considered (§2.5 of report)</h3>
+  <ul>
+    <li><span class="accent">BFS</span> — only correct for unweighted graphs · ours has weights, ruled out</li>
+    <li><span class="accent">A*</span> — needs a geometric heuristic · we have no coordinates</li>
+    <li><span class="accent">Bellman-Ford</span> — handles negative edges · we don't need that, and it's O(VE) = 26× slower</li>
+  </ul>
+</div>
+
+<!-- ================= 10. Task C OOP design ================= -->
+<div class="slide" data-slide="10">
+  <span class="speaker-tag alex">Speaker: Alex &nbsp;|&nbsp; 1:10</span>
+  <h2>Task C — OOP design</h2>
+  <div class="cols">
+    <div>
+      <h3>Five packages</h3>
+      <ul>
+        <li><span class="mono accent-2">model.*</span> — immutable values</li>
+        <li><span class="mono accent-2">io.*</span> — CSV reading</li>
+        <li><span class="mono accent-2">sort.*</span> — three sorters behind one interface</li>
+        <li><span class="mono accent-2">graph.*</span> — graph + Dijkstra</li>
+        <li><span class="mono accent-2">app.*</span> — driver only</li>
+      </ul>
+      <h3 style="margin-top:1em">Two interfaces, two pipelines</h3>
+      <p>Adding a 4th sort algorithm (Heap Sort?) means writing one new class. Adding BFS means writing one new class. <strong>Zero changes</strong> to <span class="mono">Main</span>.</p>
+    </div>
+    <div>
+      <h3>The four OOP principles, mapped</h3>
+      <table>
+        <thead><tr><th>Principle</th><th>Where</th></tr></thead>
+        <tbody>
+          <tr><td>Encapsulation</td><td><span class="mono">Candidate</span> immutable, fields private final</td></tr>
+          <tr><td>Inheritance</td><td><span class="mono">BubbleSort/QuickSort/MergeSort</span> implement <span class="mono">Sorter</span></td></tr>
+          <tr><td>Abstraction</td><td><span class="mono">Sorter</span> &amp; <span class="mono">ShortestPathFinder</span> interfaces</td></tr>
+          <tr><td>Polymorphism</td><td><span class="mono">Main</span> loop iterates <span class="mono">List&lt;Sorter&gt;</span> with dynamic dispatch</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <div class="uml-row" style="margin-top:1em">
+    <div class="uml-box iface"><div class="uml-name">Sorter</div>+ sort(list, cmp)<br>+ name()</div>
+    <div class="uml-box"><div class="uml-name">BubbleSort</div>implements Sorter</div>
+    <div class="uml-box"><div class="uml-name">QuickSort</div>implements Sorter</div>
+    <div class="uml-box"><div class="uml-name">MergeSort</div>implements Sorter</div>
+    <div class="uml-box"><div class="uml-name">SortBenchmark</div>uses Sorter</div>
+  </div>
+</div>
+
+<!-- ================= 11. Task C data structures ================= -->
+<div class="slide" data-slide="11">
+  <span class="speaker-tag alex">Speaker: Alex &nbsp;|&nbsp; 0:40</span>
+  <h2>Why these collections, in one line each</h2>
+  <table>
+    <thead><tr><th>Where</th><th>Type chosen</th><th>One-line justification</th></tr></thead>
+    <tbody>
+      <tr><td>Candidate lists</td><td><span class="mono">ArrayList&lt;Candidate&gt;</span></td><td>Sort-then-iterate workload · O(1) random access · contiguous = cache-friendly</td></tr>
+      <tr><td>Graph adjacency</td><td><span class="mono">HashMap&lt;String, List&lt;Arc&gt;&gt;</span></td><td>O(1) lookup of node's neighbours by ID · sparse-graph efficient</td></tr>
+      <tr><td>Dijkstra frontier</td><td><span class="mono">PriorityQueue&lt;Entry&gt;</span></td><td>Binary heap = O(log V) extract-min · the reason we beat O(V²)</td></tr>
+      <tr><td>Settled set</td><td><span class="mono">HashSet&lt;String&gt;</span></td><td>O(1) "have we already finalised this node?" check</td></tr>
+    </tbody>
+  </table>
+  <h3 style="margin-top:1em">Java Collection inheritance (slide 10 of teammate's deck → expanded)</h3>
+  <pre class="code" style="font-size:0.85em"><span class="com">// Lineage of every container we use:</span>
+Iterable
+  └─ Collection
+       ├─ <span class="hl">List           ← ArrayList (Candidate lists)</span>
+       └─ Queue
+            └─ <span class="hl">PriorityQueue   (Dijkstra frontier)</span>
+
+Map  <span class="com">// not a Collection — separate hierarchy</span>
+  └─ <span class="hl">HashMap          (adjacency &amp; dist maps)</span></pre>
+</div>
+
+<!-- ================= 12. Task D reflection ================= -->
+<div class="slide" data-slide="12">
+  <span class="speaker-tag alex">Speaker: Alex &nbsp;|&nbsp; 0:50</span>
+  <h2>Task D — Process &amp; reflection</h2>
+  <div class="cols">
+    <div>
+      <h3>Trello board</h3>
+      <p>5 columns: Backlog · This Week · In Progress · Review · Done. Each card carries <strong>description, acceptance criteria, due date, checklist, label, and member</strong> — the same fields a real engineering team would use.</p>
+      <div class="card note">
+        <strong>AI tool: ChatGPT (gpt-4o)</strong><br>
+        <span class="good">+</span> drafted Trello card descriptions in seconds<br>
+        <span class="good">+</span> suggested acceptance-criteria phrasing we kept<br>
+        <span class="good">+</span> proofread English on report drafts<br>
+        <span class="bad">−</span> hallucinated a non-existent <span class="mono">Comparator.thenReversing()</span> method<br>
+        <span class="bad">−</span> verbose suggestions had to be trimmed<br>
+        <span class="bad">−</span> no awareness of CPT204 library allowlist
+      </div>
+    </div>
+    <div>
+      <h3>EDI &amp; life-long learning</h3>
+      <p><strong>Concrete EDI improvements we'd ship next:</strong></p>
+      <ul>
+        <li><span class="accent">Text-to-speech</span> for visually impaired inspectors using the route output</li>
+        <li><span class="accent">Internationalisation</span>: location IDs are language-neutral, but the console messages aren't yet</li>
+        <li><span class="accent">Colour-blind palette</span> for the path-visualisation chart (don't rely on red/green alone)</li>
+      </ul>
+      <p><strong>Life-long learning:</strong> the rigorous benchmark methodology (warm-up, nanoTime, repeated runs) is a transferable skill we'll re-use any time someone says "is this faster?"</p>
+    </div>
+  </div>
+</div>
+
+<!-- ================= 13. Closing ================= -->
+<div class="slide" data-slide="13">
+  <span class="speaker-tag alex">Speakers: Alex + Teammate &nbsp;|&nbsp; 0:30</span>
+  <h2>In summary</h2>
+  <div class="cols">
+    <div class="card win">
+      <h3>What we delivered</h3>
+      <ul>
+        <li>Three sorting algorithms, benchmarked with warm-up + nanoTime + 3 runs averaged</li>
+        <li>Heap-based Dijkstra at <span class="mono">O((V+E) log V)</span> — 28× cheaper than textbook O(V²)</li>
+        <li>Two interfaces, five packages, four OOP principles, no library imports outside the CPT204 allowlist</li>
+        <li>Trello board · UML diagrams · contribution form · this deck</li>
+      </ul>
+    </div>
+    <div class="card note">
+      <h3>If we had another week</h3>
+      <ul>
+        <li>Heap Sort as a 4th <span class="mono">Sorter</span> implementation (zero <span class="mono">Main</span> changes)</li>
+        <li>Globally-optimal k-waypoint solver to fix Case 3's backtrack</li>
+        <li>JUnit test suite covering all four Task B cases</li>
+        <li>i18n / TTS / colour-blind palette per Task D EDI plan</li>
+      </ul>
+    </div>
+  </div>
+  <h1 style="margin-top:1.5em; text-align:center; color: var(--accent)">Thank you · Questions?</h1>
+  <p style="text-align:center" class="muted">Alex (lead Task C / D) &nbsp;·&nbsp; Teammate (lead Task A / B) &nbsp;·&nbsp; Group 22</p>
+</div>
+
+<div class="pageno"><span id="pageno-now">1</span> / <span id="pageno-total">13</span></div>
+<div class="nav">
+  <button onclick="prev()">←</button>
+  <button onclick="next()">→</button>
+</div>
+
+<script>
+  // === Slide navigation ===
+  const slides = document.querySelectorAll('.slide');
+  let cur = 0;
+  document.getElementById('pageno-total').textContent = slides.length;
+
+  function show(i) {
+    if (i < 0 || i >= slides.length) return;
+    slides[cur].classList.remove('active');
+    slides[i].classList.add('active');
+    cur = i;
+    document.getElementById('pageno-now').textContent = i + 1;
+  }
+  function next() { show(cur + 1); }
+  function prev() { show(cur - 1); }
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') next();
+    else if (e.key === 'ArrowLeft' || e.key === 'PageUp') prev();
+    else if (e.key === 'Home') show(0);
+    else if (e.key === 'End') show(slides.length - 1);
+  });
+
+  // ====== Bubble Sort animation ======
+  let bubbleArr, bubbleI, bubbleK, bubbleSwapped, bubbleDone, bubbleAutoTimer;
+  const BUBBLE_DATA = [5, 2, 8, 1, 9, 3, 7, 4, 6];
+
+  function bubbleRender(highlight = {}) {
+    const c = document.getElementById('bubble-bars');
+    c.innerHTML = '';
+    const max = Math.max(...bubbleArr);
+    bubbleArr.forEach((v, i) => {
+      const b = document.createElement('div');
+      b.className = 'bar';
+      if (highlight.compare && highlight.compare.includes(i)) b.classList.add('compare');
+      if (highlight.swap && highlight.swap.includes(i)) b.classList.add('swap');
+      if (highlight.sortedFrom !== undefined && i >= highlight.sortedFrom) b.classList.add('sorted');
+      b.style.height = (v / max * 95) + '%';
+      b.textContent = v;
+      c.appendChild(b);
+    });
+  }
+  function bubbleReset() {
+    clearInterval(bubbleAutoTimer);
+    bubbleArr = [...BUBBLE_DATA];
+    bubbleI = 0; bubbleK = 1; bubbleSwapped = false; bubbleDone = false;
+    document.getElementById('bubble-status').textContent = 'Pass 1 of n−1 · ready';
+    bubbleRender();
+  }
+  function bubbleStep() {
+    if (bubbleDone) return;
+    const n = bubbleArr.length;
+    if (bubbleI < n - bubbleK) {
+      const a = bubbleArr[bubbleI], b = bubbleArr[bubbleI + 1];
+      if (a > b) {
+        bubbleArr[bubbleI] = b; bubbleArr[bubbleI + 1] = a;
+        bubbleSwapped = true;
+        bubbleRender({ swap: [bubbleI, bubbleI + 1], sortedFrom: n - bubbleK + 1 });
+        document.getElementById('bubble-status').textContent =
+          `Pass ${bubbleK} · swap a[${bubbleI}]=${b} ↔ a[${bubbleI+1}]=${a}`;
+      } else {
+        bubbleRender({ compare: [bubbleI, bubbleI + 1], sortedFrom: n - bubbleK + 1 });
+        document.getElementById('bubble-status').textContent =
+          `Pass ${bubbleK} · compare a[${bubbleI}]=${a} ≤ a[${bubbleI+1}]=${b} → no swap`;
+      }
+      bubbleI++;
+    } else {
+      // end of pass
+      if (!bubbleSwapped) {
+        bubbleDone = true;
+        bubbleRender({ sortedFrom: 0 });
+        document.getElementById('bubble-status').textContent =
+          `Pass ${bubbleK} ended with NO swaps → early exit (Liang's flag). Done.`;
+        clearInterval(bubbleAutoTimer);
+        return;
+      }
+      bubbleK++; bubbleI = 0; bubbleSwapped = false;
+      if (bubbleK >= n) {
+        bubbleDone = true;
+        bubbleRender({ sortedFrom: 0 });
+        document.getElementById('bubble-status').textContent = 'Done.';
+        clearInterval(bubbleAutoTimer);
+        return;
+      }
+      document.getElementById('bubble-status').textContent =
+        `Starting pass ${bubbleK} · last ${bubbleK - 1} element(s) settled at the right`;
+      bubbleRender({ sortedFrom: n - bubbleK + 1 });
+    }
+  }
+  function bubbleAuto() {
+    clearInterval(bubbleAutoTimer);
+    bubbleAutoTimer = setInterval(() => {
+      bubbleStep();
+      if (bubbleDone) clearInterval(bubbleAutoTimer);
+    }, 350);
+  }
+  bubbleReset();
+
+  // ====== Quick Sort animation ======
+  // Simple visualisation: we precompute the trace and step through it
+  let quickArr, quickTrace, quickPos, quickAutoTimer;
+  const QUICK_DATA = [4, 7, 2, 9, 1, 5, 3, 8, 6];
+
+  function quickBuildTrace() {
+    // Generate a step-by-step trace of Lomuto partition with median-of-three
+    const trace = [];
+    const arr = [...QUICK_DATA];
+    function snapshot(highlight, msg) {
+      trace.push({ arr: [...arr], hi: { ...highlight }, msg });
+    }
+    function swap(i, j) { [arr[i], arr[j]] = [arr[j], arr[i]]; }
+    function medianOfThree(lo, mid, hi) {
+      if (arr[lo] > arr[mid]) swap(lo, mid);
+      if (arr[lo] > arr[hi])  swap(lo, hi);
+      if (arr[mid] > arr[hi]) swap(mid, hi);
+      swap(mid, hi);
+    }
+    function partition(lo, hi) {
+      const mid = lo + ((hi - lo) >> 1);
+      medianOfThree(lo, mid, hi);
+      snapshot({ pivot: [hi] }, `Median-of-three picked → pivot = ${arr[hi]} (at index ${hi})`);
+      const pivot = arr[hi];
+      let i = lo - 1;
+      for (let j = lo; j < hi; j++) {
+        snapshot({ pivot: [hi], compare: [j] }, `Compare a[${j}]=${arr[j]} vs pivot=${pivot}`);
+        if (arr[j] <= pivot) {
+          i++;
+          if (i !== j) {
+            swap(i, j);
+            snapshot({ pivot: [hi], swap: [i, j] }, `a[${j}] ≤ pivot → swap into partition (i=${i})`);
+          }
+        }
+      }
+      swap(i + 1, hi);
+      snapshot({ pivot: [i + 1], sortedFrom: i + 1, sortedTo: i + 1 },
+        `Place pivot at final position ${i + 1}`);
+      return i + 1;
+    }
+    function qs(lo, hi) {
+      if (lo >= hi) return;
+      const p = partition(lo, hi);
+      qs(lo, p - 1);
+      qs(p + 1, hi);
+    }
+    qs(0, arr.length - 1);
+    snapshot({ allSorted: true }, 'Sorted.');
+    return trace;
+  }
+
+  function quickRender(state) {
+    const c = document.getElementById('quick-bars');
+    c.innerHTML = '';
+    const max = Math.max(...state.arr);
+    state.arr.forEach((v, i) => {
+      const b = document.createElement('div');
+      b.className = 'bar';
+      const h = state.hi || {};
+      if (h.allSorted) b.classList.add('sorted');
+      if (h.pivot && h.pivot.includes(i)) b.classList.add('pivot');
+      if (h.compare && h.compare.includes(i)) b.classList.add('compare');
+      if (h.swap && h.swap.includes(i)) b.classList.add('swap');
+      b.style.height = (v / max * 95) + '%';
+      b.textContent = v;
+      c.appendChild(b);
+    });
+  }
+  function quickReset() {
+    clearInterval(quickAutoTimer);
+    quickArr = [...QUICK_DATA];
+    quickTrace = quickBuildTrace();
+    quickPos = 0;
+    quickRender({ arr: QUICK_DATA, hi: {} });
+    document.getElementById('quick-status').textContent = `step 0 / ${quickTrace.length} · ready`;
+  }
+  function quickStep() {
+    if (quickPos >= quickTrace.length) return;
+    const s = quickTrace[quickPos];
+    quickRender(s);
+    document.getElementById('quick-status').textContent = `step ${quickPos + 1} / ${quickTrace.length} · ${s.msg}`;
+    quickPos++;
+  }
+  function quickAuto() {
+    clearInterval(quickAutoTimer);
+    quickAutoTimer = setInterval(() => {
+      if (quickPos >= quickTrace.length) { clearInterval(quickAutoTimer); return; }
+      quickStep();
+    }, 500);
+  }
+  quickReset();
+
+  // ====== Dijkstra animation ======
+  // Tiny 7-node graph that mimics the structure of our 1000-node graph.
+  const DJ_NODES = [
+    { id: 'A', x: 80,  y: 200, label: 'L0001 (start)' },
+    { id: 'B', x: 240, y: 90,  label: 'B' },
+    { id: 'C', x: 240, y: 310, label: 'C' },
+    { id: 'D', x: 420, y: 90,  label: 'D' },
+    { id: 'E', x: 420, y: 310, label: 'E' },
+    { id: 'F', x: 600, y: 200, label: 'F' },
+    { id: 'G', x: 740, y: 200, label: 'L0010 (end)' },
+  ];
+  const DJ_EDGES = [
+    { a: 'A', b: 'B', w: 4 },
+    { a: 'A', b: 'C', w: 2 },
+    { a: 'B', b: 'C', w: 1 },
+    { a: 'B', b: 'D', w: 5 },
+    { a: 'C', b: 'E', w: 8 },
+    { a: 'C', b: 'D', w: 10 },
+    { a: 'D', b: 'F', w: 2 },
+    { a: 'E', b: 'F', w: 3 },
+    { a: 'F', b: 'G', w: 6 },
+  ];
+
+  function djNeighbours(id) {
+    return DJ_EDGES.filter(e => e.a === id || e.b === id)
+      .map(e => ({ to: e.a === id ? e.b : e.a, w: e.w, edge: e }));
+  }
+
+  let djDist, djPrev, djSettled, djFrontier, djTrace, djPos, djAutoTimer;
+
+  function djBuildTrace(start, end) {
+    const dist = {}, prev = {}, settled = new Set();
+    DJ_NODES.forEach(n => dist[n.id] = Infinity);
+    dist[start] = 0;
+    const trace = [];
+    // Use plain array as PQ (small)
+    const pq = [{ id: start, d: 0 }];
+    function snap(msg, focus = {}) {
+      trace.push({
+        dist: { ...dist },
+        prev: { ...prev },
+        settled: new Set(settled),
+        frontier: pq.map(e => e.id),
+        focus,
+        msg,
+      });
+    }
+    snap(`Init · dist[${start}] = 0 · push ${start} into heap`);
+    while (pq.length) {
+      pq.sort((x, y) => x.d - y.d);
+      const cur = pq.shift();
+      if (settled.has(cur.id)) continue;
+      settled.add(cur.id);
+      snap(`Pop ${cur.id} (dist ${cur.d}) · settle it`, { current: cur.id });
+      if (cur.id === end) {
+        snap(`Reached end ${end} · stop`, { current: end });
+        break;
+      }
+      for (const nb of djNeighbours(cur.id)) {
+        if (settled.has(nb.to)) continue;
+        const nd = cur.d + nb.w;
+        if (nd < dist[nb.to]) {
+          dist[nb.to] = nd;
+          prev[nb.to] = cur.id;
+          pq.push({ id: nb.to, d: nd });
+          snap(`Relax ${cur.id} → ${nb.to} · dist[${nb.to}] = ${nd}`, { current: cur.id, relax: nb.edge });
+        } else {
+          snap(`Skip ${cur.id} → ${nb.to} (${nd} ≥ ${dist[nb.to]})`, { current: cur.id });
+        }
+      }
+    }
+    // reconstruct path
+    const path = [];
+    for (let n = end; n; n = prev[n]) path.unshift(n);
+    snap(`Done · path = ${path.join(' → ')} · cost = ${dist[end]}`, { path });
+    return trace;
+  }
+
+  function djRender(state) {
+    const svg = document.getElementById('dijkstra-svg');
+    svg.innerHTML = '';
+    // Edges first
+    DJ_EDGES.forEach(e => {
+      const a = DJ_NODES.find(n => n.id === e.a);
+      const b = DJ_NODES.find(n => n.id === e.b);
+      const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+      line.setAttribute('class', 'edge');
+      line.setAttribute('x1', a.x); line.setAttribute('y1', a.y);
+      line.setAttribute('x2', b.x); line.setAttribute('y2', b.y);
+      if (state.focus && state.focus.relax === e) line.classList.add('relax');
+      // Highlight final path edges
+      if (state.focus && state.focus.path) {
+        const p = state.focus.path;
+        for (let i = 0; i < p.length - 1; i++) {
+          if ((p[i] === e.a && p[i+1] === e.b) || (p[i] === e.b && p[i+1] === e.a)) {
+            line.classList.add('path');
+          }
+        }
+      }
+      svg.appendChild(line);
+      // weight label
+      const t = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+      t.setAttribute('class', 'weight');
+      t.setAttribute('x', (a.x + b.x) / 2);
+      t.setAttribute('y', (a.y + b.y) / 2 - 6);
+      t.textContent = e.w;
+      svg.appendChild(t);
+    });
+    // Nodes
+    DJ_NODES.forEach(n => {
+      const c = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+      c.setAttribute('class', 'node');
+      c.setAttribute('cx', n.x); c.setAttribute('cy', n.y); c.setAttribute('r', 22);
+      if (state.settled && state.settled.has(n.id)) c.classList.add('settled');
+      else if (state.frontier && state.frontier.includes(n.id)) c.classList.add('frontier');
+      if (n.id === 'A') c.classList.add('start');
+      if (n.id === 'G') c.classList.add('end');
+      svg.appendChild(c);
+
+      const t = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+      t.setAttribute('x', n.x); t.setAttribute('y', n.y + 4);
+      t.textContent = n.id;
+      svg.appendChild(t);
+
+      // distance below the node
+      const d = state.dist ? state.dist[n.id] : Infinity;
+      const dt = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+      dt.setAttribute('x', n.x); dt.setAttribute('y', n.y + 42);
+      dt.setAttribute('class', 'weight');
+      dt.textContent = (d === Infinity ? '∞' : d);
+      svg.appendChild(dt);
+    });
+  }
+
+  function dijkstraReset() {
+    clearInterval(djAutoTimer);
+    djTrace = djBuildTrace('A', 'G');
+    djPos = 0;
+    djRender({ dist: Object.fromEntries(DJ_NODES.map(n => [n.id, n.id === 'A' ? 0 : Infinity])),
+               settled: new Set(), frontier: ['A'], focus: {} });
+    document.getElementById('dijkstra-status').textContent = `step 0 / ${djTrace.length} · ready · 7 nodes, 9 edges`;
+  }
+  function dijkstraStep() {
+    if (djPos >= djTrace.length) return;
+    const s = djTrace[djPos];
+    djRender(s);
+    document.getElementById('dijkstra-status').textContent = `step ${djPos + 1} / ${djTrace.length} · ${s.msg}`;
+    djPos++;
+  }
+  function dijkstraAuto() {
+    clearInterval(djAutoTimer);
+    djAutoTimer = setInterval(() => {
+      if (djPos >= djTrace.length) { clearInterval(djAutoTimer); return; }
+      dijkstraStep();
+    }, 800);
+  }
+  dijkstraReset();
+</script>
+
+</body>
+</html>
