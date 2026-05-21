@@ -6,7 +6,7 @@ co-owned integration, proofreading, and the joint video recording.
 
 | Student ID | Name | Contribution |
 |---|---|---|
-| <!-- BLOCKER: James's student ID --> | <!-- BLOCKER: James's full name as on LMO --> | 50 % |
+| <!-- BLOCKER: Alex's student ID --> | <!-- BLOCKER: Alex's full name as on LMO --> | 50 % |
 | <!-- BLOCKER: teammate's student ID --> | <!-- BLOCKER: teammate's full name as on LMO --> | 50 % |
 | **Total** | | **100 %** |
 
@@ -16,7 +16,7 @@ This is a non-binding description of the *type* of work each member
 focused on, intended to satisfy the marker's request for a contribution
 breakdown beyond the percentage.
 
-| Area | <!-- BLOCKER: James --> | <!-- BLOCKER: teammate --> |
+| Area | <!-- BLOCKER: Alex --> | <!-- BLOCKER: teammate --> |
 |---|---|---|
 | `model/*`, `io/CsvReader`, `sort/*`, `SortBenchmark` | lead | review |
 | `graph/*`, `DijkstraShortestPath`, `findVia` | review | lead |
@@ -35,7 +35,7 @@ submission. The split above is roughly equal in time invested, even
 where the type of work differs.
 
 <!-- BLOCKER: confirm this split honestly reflects the actual division
-     of work between James and the teammate. Edit any "lead" / "review"
+     of work between Alex and the teammate. Edit any "lead" / "review"
      entries that do not match reality. The module policy is that the
      percentage column must total 100 % and that an unequal split (e.g.
      60/40) must be reflected in the percentages, not papered over. -->

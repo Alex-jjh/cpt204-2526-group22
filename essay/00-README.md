@@ -26,7 +26,7 @@ Anywhere a piece of information is still missing, the draft uses a
 `<!-- BLOCKER: ... -->` comment so it is searchable and impossible to
 miss. Examples:
 
-- `<!-- BLOCKER: student ID for James -->`
+- `<!-- BLOCKER: student ID for Alex -->`
 - `<!-- BLOCKER: AI citation tool name & version -->`
 
 After every change, run `grep -n "BLOCKER" essay/*.md` to see what is
