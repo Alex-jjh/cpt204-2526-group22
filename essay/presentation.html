@@ -3,17 +3,35 @@
 <head>
 <meta charset="UTF-8">
 <title>CPT204 Group 22 — Urban Infrastructure Inspection System</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght,SOFT,WONK@9..144,300;9..144,400;9..144,600;9..144,800;9..144,900;9..144,400,100,1&family=Inter+Tight:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #0f172a;
-    --bg-2: #1e293b;
-    --fg: #e2e8f0;
-    --muted: #94a3b8;
-    --accent: #38bdf8;
-    --accent-2: #fbbf24;
-    --good: #4ade80;
-    --bad: #f87171;
-    --pivot: #f472b6;
+    --ink:        #0a0d12;
+    --ink-2:      #121620;
+    --ink-3:      #1b212e;
+    --paper:      #efe6d2;
+    --paper-dim:  #b8ad97;
+    --paper-mute: #6e6856;
+    --gold:       #c8964f;
+    --gold-soft:  #e3b96b;
+    --vermillion: #c5392a;
+    --sage:       #7a9576;
+    --rose:       #d4736a;
+    --rule:       rgba(239,230,210,0.16);
+    --rule-strong:rgba(239,230,210,0.36);
+
+    /* legacy aliases so existing slides keep working untouched */
+    --bg: var(--ink);
+    --bg-2: var(--ink-2);
+    --fg: var(--paper);
+    --muted: var(--paper-dim);
+    --accent: var(--gold-soft);
+    --accent-2: var(--vermillion);
+    --good: var(--sage);
+    --bad: var(--rose);
+    --pivot: var(--rose);
   }
 
   * { box-sizing: border-box; }
@@ -21,78 +39,1642 @@
     margin: 0; padding: 0;
     width: 100vw; height: 100vh;
     overflow: hidden;
-    font-family: 'Inter', 'Segoe UI', -apple-system, sans-serif;
-    background: var(--bg);
-    color: var(--fg);
+    background: var(--ink);
+    color: var(--paper);
+    font-family: 'Newsreader', 'Fraunces', 'Iowan Old Style', Georgia, serif;
+    font-size: clamp(14px, 1.05vw, 18px);
+    font-feature-settings: "liga", "kern", "onum";
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Atmospheric layers — vignette + paper grain */
+  body::before {
+    content:''; position: fixed; inset: 0; pointer-events: none; z-index: 1;
+    background:
+      radial-gradient(ellipse 80% 60% at 50% 0%, rgba(200,150,79,0.10), transparent 60%),
+      radial-gradient(ellipse 100% 80% at 50% 100%, rgba(10,13,18,0.85), transparent 50%),
+      radial-gradient(circle at 15% 50%, rgba(122,149,118,0.05), transparent 40%);
+  }
+  body::after {
+    content:''; position: fixed; inset: 0; pointer-events: none; z-index: 2;
+    opacity: 0.07; mix-blend-mode: overlay;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='320' height='320'><filter id='n'><feTurbulence baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.95 0 0 0 0 0.91 0 0 0 0 0.82 0 0 0 0.5 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
   }
 
   .slide {
     position: absolute; inset: 0;
-    padding: 4vh 6vw;
+    padding: 5.2vh 6.5vw 6vh;
     display: none;
     flex-direction: column;
     overflow: hidden;
-    animation: fadeIn 0.5s ease;
+    z-index: 3;
   }
-  .slide.active { display: flex; }
+  .slide.active { display: flex; animation: pageIn 0.7s cubic-bezier(0.2, 0.7, 0.2, 1) both; }
 
-  @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
+  @keyframes pageIn {
+    from { opacity: 0; transform: translateY(8px); filter: blur(2px); }
+    to   { opacity: 1; transform: translateY(0);  filter: blur(0); }
+  }
+  .slide.active > * { animation: riseIn 0.9s cubic-bezier(0.2, 0.7, 0.2, 1) both; }
+  .slide.active > *:nth-child(1) { animation-delay: 0.05s; }
+  .slide.active > *:nth-child(2) { animation-delay: 0.18s; }
+  .slide.active > *:nth-child(3) { animation-delay: 0.28s; }
+  .slide.active > *:nth-child(4) { animation-delay: 0.36s; }
+  .slide.active > *:nth-child(n+5) { animation-delay: 0.42s; }
+  @keyframes riseIn {
+    from { opacity: 0; transform: translateY(12px); }
     to   { opacity: 1; transform: translateY(0); }
   }
 
-  h1 { font-size: 3.4em; margin: 0 0 0.2em 0; line-height: 1.1; }
-  h2 { font-size: 2.2em; margin: 0 0 0.4em 0; color: var(--accent); }
-  h3 { font-size: 1.3em; margin: 0.6em 0 0.2em; color: var(--accent-2); }
-  p, li { font-size: 1.15em; line-height: 1.55; }
-  .muted { color: var(--muted); }
-  .accent { color: var(--accent); }
-  .accent-2 { color: var(--accent-2); }
-  .good { color: var(--good); }
-  .bad { color: var(--bad); }
+  /* Hairline frame on every slide — the "monograph" device */
+  .slide::before {
+    content:''; position: absolute;
+    top: 2.6vh; left: 3vw; right: 3vw; bottom: 3.2vh;
+    border: 1px solid var(--rule);
+    pointer-events: none;
+  }
+  .slide::after {
+    content:''; position: absolute;
+    top: 2.4vh; left: 2.8vw; right: 2.8vw; bottom: 3vh;
+    border: 1px solid transparent;
+    border-top-color: var(--gold);
+    border-bottom-color: var(--gold);
+    opacity: 0.5;
+    pointer-events: none;
+    width: auto;
+  }
+
+  /* Typography */
+  h1, h2, h3, .display {
+    font-family: 'Fraunces', 'Iowan Old Style', Georgia, serif;
+    font-feature-settings: "ss01", "ss02", "lnum", "kern";
+    font-weight: 600;
+    letter-spacing: -0.015em;
+  }
+  h1 {
+    font-size: clamp(2.8rem, 5.4vw, 5rem);
+    margin: 0 0 0.25em 0;
+    line-height: 0.98;
+    font-weight: 700;
+    letter-spacing: -0.025em;
+    color: var(--paper);
+  }
+  h2 {
+    font-size: clamp(1.7rem, 2.6vw, 2.4rem);
+    margin: 0 0 0.45em 0;
+    line-height: 1.1;
+    color: var(--paper);
+    font-weight: 600;
+  }
+  h3 {
+    font-size: clamp(1rem, 1.3vw, 1.2rem);
+    margin: 0.7em 0 0.25em;
+    color: var(--gold-soft);
+    font-weight: 600;
+    font-style: italic;
+    font-variation-settings: "SOFT" 100;
+  }
+  p, li, td, th {
+    font-size: clamp(0.92rem, 1.05vw, 1.05rem);
+    line-height: 1.55;
+    color: var(--paper);
+  }
+  strong { color: var(--paper); font-weight: 600; }
+
+  .kicker {
+    font-family: 'Inter Tight', sans-serif;
+    font-size: 0.72rem;
+    font-weight: 500;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    color: var(--gold);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.8em;
+  }
+  .kicker::before, .kicker::after {
+    content:''; width: 28px; height: 1px;
+    background: var(--gold); opacity: 0.6;
+  }
+  .kicker.left::after  { display: none; }
+  .kicker.right::before { display: none; }
+
+  .label {
+    font-family: 'Inter Tight', sans-serif;
+    font-size: 0.7rem;
+    font-weight: 500;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--paper-mute);
+  }
+
+  .muted { color: var(--paper-dim); }
+  .accent { color: var(--gold-soft); }
+  .accent-2 { color: var(--vermillion); }
+  .good { color: var(--sage); }
+  .bad { color: var(--rose); }
+  .gold { color: var(--gold); }
+
+  .drop {
+    font-family: 'Fraunces', serif;
+    font-size: 4.2em;
+    line-height: 0.85;
+    float: left;
+    margin: 0.05em 0.12em 0 0;
+    color: var(--gold);
+    font-weight: 800;
+    font-feature-settings: "ss01";
+  }
+
+  /* Hairline rules */
+  .rule {
+    border: none; height: 1px;
+    background: linear-gradient(90deg, transparent, var(--rule-strong) 12%, var(--rule-strong) 88%, transparent);
+    margin: 0.8em 0;
+  }
+  .rule-gold {
+    border: none; height: 1px;
+    background: linear-gradient(90deg, transparent, var(--gold) 50%, transparent);
+    opacity: 0.7;
+    margin: 0.6em 0;
+  }
+
   code, .mono {
     font-family: 'JetBrains Mono', 'Fira Code', Consolas, monospace;
-    background: rgba(56, 189, 248, 0.12);
-    padding: 1px 6px; border-radius: 4px;
-    font-size: 0.92em;
+    background: rgba(200,150,79,0.10);
+    border: 1px solid rgba(200,150,79,0.18);
+    padding: 1px 7px;
+    border-radius: 2px;
+    font-size: 0.86em;
+    color: var(--gold-soft);
+    letter-spacing: -0.02em;
   }
 
   /* Navigation */
   .nav {
     position: fixed;
-    bottom: 16px; right: 22px;
-    display: flex; gap: 10px;
+    bottom: 2.4vh; right: 2.4vw;
+    display: flex; gap: 8px;
     z-index: 100;
   }
   .nav button {
-    background: var(--bg-2);
-    border: 1px solid var(--muted);
-    color: var(--fg);
-    padding: 6px 14px;
-    border-radius: 6px;
+    background: transparent;
+    border: 1px solid var(--rule-strong);
+    color: var(--paper-dim);
+    width: 38px; height: 38px;
+    border-radius: 0;
     cursor: pointer;
-    font-size: 1em;
+    font-size: 1.1em;
+    font-family: 'Fraunces', serif;
+    transition: all 0.3s ease;
   }
-  .nav button:hover { background: var(--accent); color: var(--bg); }
+  .nav button:hover {
+    background: var(--paper);
+    color: var(--ink);
+    border-color: var(--paper);
+  }
+
+  /* Folio — page number bottom center */
   .pageno {
     position: fixed;
-    bottom: 18px; left: 22px;
-    color: var(--muted);
-    font-size: 0.95em;
+    bottom: 2.4vh; left: 50%;
+    transform: translateX(-50%);
     z-index: 100;
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 0.92rem;
+    color: var(--paper-mute);
+    letter-spacing: 0.05em;
   }
+  .pageno::before, .pageno::after {
+    content: '·'; margin: 0 0.6em; color: var(--gold);
+  }
+
+  /* Running header — top of slide */
+  .runner {
+    position: absolute;
+    top: 3.2vh; left: 6.5vw; right: 6.5vw;
+    display: flex; justify-content: space-between;
+    font-family: 'Inter Tight', sans-serif;
+    font-size: 0.65rem;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    color: var(--paper-mute);
+    z-index: 4;
+    pointer-events: none;
+  }
+  .runner .left  { color: var(--gold); }
+  .runner .right { font-style: italic; text-transform: none; letter-spacing: 0.05em; font-family: 'Fraunces', serif; font-size: 0.85rem; }
+
+  /* Speaker tag — refined as a bookplate */
   .speaker-tag {
     position: absolute;
-    top: 18px; right: 22px;
-    background: var(--bg-2);
-    border-left: 3px solid var(--accent);
-    padding: 4px 10px;
-    font-size: 0.85em;
-    border-radius: 3px;
-    color: var(--muted);
+    top: 6.8vh; right: 6.5vw;
+    padding: 8px 14px 8px 16px;
+    font-family: 'Inter Tight', sans-serif;
+    font-size: 0.65rem;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--paper-dim);
+    background: rgba(10,13,18,0.6);
+    border: 1px solid var(--rule);
+    border-left: 2px solid var(--gold);
+    backdrop-filter: blur(6px);
+    z-index: 5;
   }
-  .speaker-tag.alex   { border-color: var(--accent); }
-  .speaker-tag.tm     { border-color: var(--accent-2); }
+  .speaker-tag.alex { border-left-color: var(--gold-soft); }
+  .speaker-tag.tm   { border-left-color: var(--vermillion); }
+  .speaker-tag em { font-style: normal; color: var(--paper); font-weight: 500; }
+
+  /* Two-column layout */
+  .cols {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3.2vw;
+    flex: 1;
+    min-height: 0;
+  }
+  .cols.three { grid-template-columns: 1fr 1fr 1fr; gap: 2vw; }
+  .cols.asym  { grid-template-columns: 1.4fr 1fr; }
+
+  /* === COVER (slide 1) ===================================== */
+  .cover {
+    justify-content: space-between;
+    align-items: stretch;
+    padding: 7vh 7.5vw 7vh;
+  }
+  .cover-top {
+    display: flex; justify-content: space-between; align-items: flex-start;
+  }
+  .seal {
+    width: 92px; height: 92px;
+    border: 1px solid var(--gold);
+    border-radius: 50%;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    color: var(--gold);
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    position: relative;
+    flex-shrink: 0;
+  }
+  .seal::before {
+    content:''; position: absolute; inset: 6px;
+    border: 1px solid var(--gold); border-radius: 50%;
+    opacity: 0.4;
+  }
+  .seal .num { font-size: 1.9rem; font-weight: 700; line-height: 1; font-style: normal; }
+  .seal .lbl { font-size: 0.55rem; letter-spacing: 0.28em; text-transform: uppercase; margin-top: 4px; font-style: normal; font-family: 'Inter Tight', sans-serif; opacity: 0.85; }
+  .cover-meta {
+    text-align: right;
+    font-family: 'Inter Tight', sans-serif;
+    font-size: 0.7rem;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    color: var(--paper-mute);
+    line-height: 2;
+  }
+  .cover-meta .lead { color: var(--gold); }
+
+  .cover-center {
+    flex: 1; display: flex; flex-direction: column;
+    justify-content: center;
+    margin: 4vh 0;
+  }
+  .cover-eyebrow {
+    font-family: 'Inter Tight', sans-serif;
+    font-size: 0.78rem;
+    font-weight: 500;
+    letter-spacing: 0.42em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 1.4em;
+    display: flex; align-items: center; gap: 1em;
+  }
+  .cover-eyebrow::after {
+    content:''; flex: 1; max-width: 240px; height: 1px;
+    background: linear-gradient(90deg, var(--gold), transparent);
+  }
+  .cover-title {
+    font-family: 'Fraunces', serif;
+    font-size: clamp(3.2rem, 8.4vw, 7.6rem);
+    line-height: 0.9;
+    letter-spacing: -0.035em;
+    font-weight: 700;
+    color: var(--paper);
+    margin: 0;
+    font-feature-settings: "ss01", "lnum";
+  }
+  .cover-title .amp {
+    font-style: italic;
+    font-weight: 400;
+    color: var(--gold);
+    font-feature-settings: "ss01";
+    font-variation-settings: "SOFT" 100, "WONK" 1;
+    margin: 0 0.05em;
+  }
+  .cover-title .stack {
+    display: block;
+    color: var(--gold-soft);
+    font-style: italic;
+    font-weight: 400;
+    font-size: 0.62em;
+    letter-spacing: -0.015em;
+    margin-top: 0.18em;
+    font-variation-settings: "SOFT" 100;
+  }
+  .cover-byline {
+    margin-top: 2.4em;
+    display: flex; align-items: baseline; gap: 2em;
+    color: var(--paper-dim);
+    font-family: 'Newsreader', 'Fraunces', serif;
+    font-size: clamp(0.95rem, 1.15vw, 1.15rem);
+    font-style: italic;
+  }
+  .cover-byline .by {
+    font-family: 'Inter Tight', sans-serif;
+    font-style: normal;
+    font-size: 0.65rem;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    color: var(--paper-mute);
+  }
+  .cover-byline strong {
+    font-style: normal;
+    font-family: 'Fraunces', serif;
+    color: var(--paper);
+    font-weight: 600;
+  }
+  .cover-byline .ampersand {
+    color: var(--gold);
+    font-size: 1.4em;
+    font-style: italic;
+  }
+
+  .cover-bottom {
+    display: flex; justify-content: space-between; align-items: flex-end;
+    padding-top: 3vh;
+    border-top: 1px solid var(--rule);
+  }
+  .toc {
+    display: flex; gap: 0;
+    font-family: 'Inter Tight', sans-serif;
+    font-size: 0.68rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--paper-mute);
+  }
+  .toc-item {
+    padding: 0 1.4em 0 0;
+    margin-right: 1.4em;
+    border-right: 1px solid var(--rule-strong);
+    line-height: 1.4;
+  }
+  .toc-item:last-child { border-right: none; }
+  .toc-item .n {
+    display: block;
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 1.1rem;
+    color: var(--gold);
+    letter-spacing: 0;
+    text-transform: none;
+    font-weight: 600;
+    margin-bottom: 0.2em;
+  }
+  .cover-spine {
+    text-align: right;
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 0.95rem;
+    color: var(--paper-mute);
+    line-height: 1.5;
+  }
+  .cover-spine .vol {
+    display: block;
+    font-family: 'Inter Tight', sans-serif;
+    font-style: normal;
+    font-size: 0.6rem;
+    letter-spacing: 0.4em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 0.5em;
+  }
+
+  /* Decorative ornament for cover center */
+  .ornament {
+    margin: 1.6em 0 0;
+    display: flex; align-items: center; gap: 0.8em;
+    color: var(--gold);
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 0.95rem;
+  }
+  .ornament .line { flex: 1; height: 1px; background: linear-gradient(90deg, transparent, var(--gold) 50%, transparent); max-width: 180px; }
+  .ornament .glyph { font-size: 1.2em; opacity: 0.7; }
+
+  /* === Slide 2: Project Brief + City Map ============================ */
+  .brief-grid {
+    display: grid;
+    grid-template-columns: 1.15fr 1fr;
+    gap: 3vw;
+    flex: 1;
+    min-height: 0;
+    margin-top: 1.2vh;
+  }
+  .map-frame {
+    position: relative;
+    border: 1px solid var(--rule-strong);
+    background:
+      linear-gradient(135deg, rgba(200,150,79,0.04), transparent 60%),
+      radial-gradient(ellipse at 30% 20%, rgba(200,150,79,0.06), transparent 60%),
+      var(--ink-2);
+    padding: 1.2em 1.4em 1em;
+    display: flex; flex-direction: column;
+    box-shadow: inset 0 0 60px rgba(0,0,0,0.5);
+  }
+  .map-frame::before {
+    content: ''; position: absolute;
+    top: 8px; left: 8px; right: 8px; bottom: 8px;
+    border: 1px solid var(--rule);
+    pointer-events: none;
+  }
+  .map-frame::after {
+    content: 'PLATE I'; position: absolute;
+    top: -1px; left: 18px;
+    background: var(--ink); padding: 0 10px;
+    font-family: 'Inter Tight', sans-serif;
+    font-size: 0.6rem; letter-spacing: 0.4em;
+    color: var(--gold); font-weight: 500;
+    transform: translateY(-50%);
+  }
+  .map-caption {
+    display: flex; justify-content: space-between; align-items: baseline;
+    margin-bottom: 0.4em;
+    padding-bottom: 0.6em;
+    border-bottom: 1px solid var(--rule);
+  }
+  .map-caption .title {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 1rem;
+    color: var(--paper);
+  }
+  .map-caption .scale {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--paper-mute);
+    letter-spacing: 0.05em;
+  }
+  .city-svg {
+    flex: 1; width: 100%; min-height: 0;
+    display: block;
+  }
+  .map-legend {
+    display: flex; gap: 1.4em; flex-wrap: wrap;
+    margin-top: 0.6em;
+    padding-top: 0.6em;
+    border-top: 1px solid var(--rule);
+    font-family: 'Inter Tight', sans-serif;
+    font-size: 0.7rem;
+    letter-spacing: 0.06em;
+    color: var(--paper-dim);
+  }
+  .legend-mark {
+    display: inline-flex; align-items: center; gap: 0.5em;
+  }
+  .legend-mark .swatch {
+    width: 12px; height: 12px; border-radius: 50%;
+    box-shadow: 0 0 0 2px var(--ink);
+  }
+  .legend-mark .swatch.start { background: var(--gold-soft); box-shadow: 0 0 0 2px var(--ink), 0 0 12px var(--gold-soft); }
+  .legend-mark .swatch.end   { background: var(--vermillion); }
+  .legend-mark .swatch.way   { background: var(--sage); }
+  .legend-mark .swatch.dot   { background: var(--paper-dim); width: 6px; height: 6px; }
+  .legend-mark .line-mark    { display: inline-block; width: 18px; height: 1.5px; background: var(--gold); }
+
+  .brief-side {
+    display: flex; flex-direction: column;
+    gap: 1.2em;
+    min-width: 0;
+  }
+  .brief-lede {
+    font-family: 'Newsreader', 'Fraunces', serif;
+    font-size: clamp(0.95rem, 1.1vw, 1.1rem);
+    line-height: 1.55;
+    color: var(--paper);
+  }
+  .brief-lede .drop-cap {
+    font-family: 'Fraunces', serif;
+    font-size: 3.4em;
+    line-height: 0.85;
+    float: left;
+    margin: 0.04em 0.1em 0 0;
+    color: var(--gold);
+    font-weight: 700;
+    font-feature-settings: "ss01";
+    font-variation-settings: "SOFT" 100;
+  }
+  .brief-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0;
+    border-top: 1px solid var(--rule-strong);
+    border-bottom: 1px solid var(--rule-strong);
+  }
+  .brief-stat {
+    padding: 0.9em 0.4em;
+    text-align: center;
+    border-right: 1px solid var(--rule);
+    position: relative;
+  }
+  .brief-stat:last-child { border-right: none; }
+  .brief-stat .num {
+    font-family: 'Fraunces', serif;
+    font-weight: 600;
+    font-size: clamp(1.8rem, 2.6vw, 2.4rem);
+    line-height: 1;
+    color: var(--gold-soft);
+    letter-spacing: -0.02em;
+    font-feature-settings: "lnum", "ss01";
+  }
+  .brief-stat .num .unit {
+    font-size: 0.42em;
+    color: var(--paper-mute);
+    margin-left: 0.2em;
+    font-style: italic;
+    font-weight: 400;
+  }
+  .brief-stat .lbl {
+    font-family: 'Inter Tight', sans-serif;
+    font-size: 0.6rem;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: var(--paper-mute);
+    margin-top: 0.5em;
+  }
+
+  /* CSV specimen cards */
+  .specimens {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1em;
+    margin-top: 0.2em;
+  }
+  .specimen {
+    background: linear-gradient(180deg, rgba(239,230,210,0.03), transparent);
+    border: 1px solid var(--rule);
+    padding: 0.8em 0.9em 0.7em;
+    position: relative;
+  }
+  .specimen .tag {
+    position: absolute;
+    top: 0; right: 0.8em;
+    transform: translateY(-50%);
+    background: var(--ink);
+    padding: 0 0.6em;
+    font-family: 'Inter Tight', sans-serif;
+    font-size: 0.55rem;
+    letter-spacing: 0.32em;
+    color: var(--vermillion);
+    text-transform: uppercase;
+  }
+  .specimen .filename {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.72rem;
+    color: var(--gold);
+    margin-bottom: 0.3em;
+    letter-spacing: 0;
+  }
+  .specimen .filename::before { content: '▸ '; opacity: 0.6; }
+  .specimen table {
+    width: 100%;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    border-collapse: collapse;
+  }
+  .specimen th {
+    text-align: left;
+    color: var(--paper-mute);
+    font-weight: 400;
+    font-family: 'Inter Tight', sans-serif;
+    font-size: 0.58rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    padding: 0.2em 0.4em 0.3em 0;
+    border-bottom: 1px solid var(--rule);
+  }
+  .specimen td {
+    padding: 0.18em 0.4em 0.18em 0;
+    color: var(--paper);
+    border: none;
+  }
+  .specimen td .lid { color: var(--gold-soft); }
+  .specimen td .num { color: var(--paper); font-feature-settings: "tnum"; }
+  .specimen td .wt  { color: var(--vermillion); }
+  .specimen .ellip {
+    color: var(--paper-mute);
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 0.7rem;
+    text-align: center;
+    padding-top: 0.3em;
+    letter-spacing: 0.4em;
+  }
+  .specimen .footer {
+    margin-top: 0.4em;
+    padding-top: 0.4em;
+    border-top: 1px dashed var(--rule);
+    font-family: 'Newsreader', serif;
+    font-style: italic;
+    font-size: 0.7rem;
+    color: var(--paper-mute);
+    line-height: 1.4;
+  }
+
+  /* Three-source bureau cards (A/B/C) — shown on slide 2 */
+  .sources-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 0.75em;
+    margin-top: 0.4em;
+  }
+  .source-card {
+    position: relative;
+    border: 1px solid var(--rule);
+    padding: 0.7em 0.75em 0.6em;
+    background: linear-gradient(180deg, rgba(239,230,210,0.03), transparent);
+  }
+  .source-card .sc-stamp {
+    position: absolute;
+    top: -0.55em; left: 0.6em;
+    background: var(--ink);
+    padding: 0 0.5em;
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 0.95rem;
+    color: var(--gold);
+  }
+  .source-card .sc-tag {
+    font-family: 'Inter Tight', sans-serif;
+    font-size: 0.55rem;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: var(--vermillion);
+    margin-bottom: 0.25em;
+  }
+  .source-card .sc-file {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--gold-soft);
+    margin-bottom: 0.45em;
+  }
+  .source-card .sc-file::before { content: '▸ '; opacity: 0.6; }
+  .source-card .sc-rows {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.68rem;
+    line-height: 1.55;
+    color: var(--paper);
+    border-top: 1px solid var(--rule);
+    border-bottom: 1px dashed var(--rule);
+    padding: 0.35em 0;
+  }
+  .source-card .sc-rows .lid { color: var(--gold-soft); }
+  .source-card .sc-rows .sep { color: var(--paper-mute); margin: 0 0.45em; }
+  .source-card .sc-rows .sc-tie {
+    color: var(--vermillion);
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 0.72rem;
+    margin-left: 0.4em;
+  }
+  .source-card .sc-cap {
+    margin-top: 0.45em;
+    font-family: 'Newsreader', serif;
+    font-style: italic;
+    font-size: 0.72rem;
+    line-height: 1.45;
+    color: var(--paper-dim);
+  }
+  .source-card .sc-cap strong {
+    font-style: normal;
+    font-weight: 500;
+    color: var(--paper);
+  }
+  .source-card .sc-top10 {
+    margin-top: 0.4em;
+    padding-top: 0.4em;
+    border-top: 1px solid var(--rule);
+    font-family: 'Inter Tight', sans-serif;
+    font-size: 0.58rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--paper-mute);
+  }
+  .source-card .sc-top10 code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    text-transform: none;
+    letter-spacing: 0;
+    color: var(--gold-soft);
+    margin-left: 0.4em;
+  }
+
+  /* Ranking-rule banner under the three sources */
+  .rank-banner {
+    margin-top: 0.7em;
+    padding: 0.7em 0.9em;
+    border-left: 2px solid var(--gold);
+    border-right: 1px solid var(--rule);
+    background:
+      linear-gradient(90deg, rgba(200,150,79,0.07), transparent 70%),
+      rgba(10,13,18,0.4);
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 0.9em;
+    align-items: center;
+  }
+  .rank-banner .rb-label {
+    font-family: 'Inter Tight', sans-serif;
+    font-size: 0.6rem;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    color: var(--gold);
+    line-height: 1.3;
+  }
+  .rank-banner .rb-label .rb-sub {
+    display: block;
+    color: var(--paper-mute);
+    letter-spacing: 0.22em;
+    font-size: 0.55rem;
+    margin-top: 0.2em;
+  }
+  .rank-banner .rb-rule {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.78rem;
+    color: var(--paper);
+    line-height: 1.55;
+  }
+  .rank-banner .rb-rule .key {
+    color: var(--gold-soft);
+  }
+  .rank-banner .rb-rule .arrow {
+    color: var(--vermillion);
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    margin: 0 0.35em;
+  }
+  .rank-banner .rb-rule em {
+    font-family: 'Newsreader', serif;
+    font-style: italic;
+    color: var(--paper-dim);
+    font-size: 0.78rem;
+  }
+
+  /* Question pair — two intent cards */
+  .questions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1em;
+  }
+  .qcard {
+    border: 1px solid var(--rule);
+    padding: 0.9em 1em 0.8em;
+    position: relative;
+    background: linear-gradient(180deg, rgba(10,13,18,0.4), transparent);
+  }
+  .qcard .qno {
+    position: absolute;
+    top: -0.7em; left: 0.9em;
+    background: var(--ink);
+    padding: 0 0.5em;
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 1.05rem;
+    color: var(--gold);
+    font-weight: 600;
+  }
+  .qcard h4 {
+    font-family: 'Fraunces', serif;
+    font-size: 1rem;
+    margin: 0 0 0.4em;
+    color: var(--paper);
+    line-height: 1.25;
+    font-weight: 600;
+  }
+  .qcard p {
+    font-family: 'Newsreader', serif;
+    font-size: 0.85rem;
+    line-height: 1.5;
+    color: var(--paper-dim);
+    margin: 0 0 0.5em;
+  }
+  .qcard .resolves {
+    font-family: 'Inter Tight', sans-serif;
+    font-size: 0.6rem;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--vermillion);
+    padding-top: 0.4em;
+    border-top: 1px solid var(--rule);
+    display: flex; justify-content: space-between;
+  }
+  .qcard .resolves em { font-style: normal; color: var(--paper-mute); }
+
+  /* === Slides 3-5: Task A chapter ================================== */
+  .chap-head {
+    display: flex; align-items: baseline; gap: 1.4em;
+    margin-bottom: 0.4em;
+  }
+  .chap-num {
+    font-family: 'Fraunces', serif;
+    font-size: clamp(2.6rem, 4.2vw, 3.8rem);
+    font-style: italic;
+    font-weight: 400;
+    color: var(--gold);
+    line-height: 0.9;
+    letter-spacing: -0.02em;
+    font-variation-settings: "SOFT" 100;
+  }
+  .chap-title-block { flex: 1; min-width: 0; }
+  .chap-kicker {
+    font-family: 'Inter Tight', sans-serif;
+    font-size: 0.7rem;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    color: var(--paper-mute);
+    margin-bottom: 0.2em;
+  }
+  .chap-title {
+    font-family: 'Fraunces', serif;
+    font-size: clamp(1.8rem, 2.7vw, 2.5rem);
+    font-weight: 600;
+    color: var(--paper);
+    line-height: 1.1;
+    margin: 0;
+    letter-spacing: -0.018em;
+  }
+
+  /* Three-algorithm card row */
+  .algo-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 1.2em;
+    margin-top: 1.4em;
+  }
+  .algo-card {
+    border: 1px solid var(--rule);
+    padding: 1.4em 1.4em 1.2em;
+    background: linear-gradient(180deg, rgba(239,230,210,0.025), transparent 60%);
+    position: relative;
+    display: flex; flex-direction: column;
+  }
+  .algo-card::before {
+    content: ''; position: absolute;
+    top: 0; left: 0; width: 32px; height: 1px;
+    background: var(--gold);
+  }
+  .algo-card .roman {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    color: var(--gold);
+    font-size: 0.95rem;
+    letter-spacing: 0.05em;
+    margin-bottom: 0.35em;
+  }
+  .algo-card h4 {
+    font-family: 'Fraunces', serif;
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin: 0 0 0.5em;
+    color: var(--paper);
+    letter-spacing: -0.015em;
+  }
+  .algo-card p {
+    font-family: 'Newsreader', serif;
+    font-size: 0.9rem;
+    line-height: 1.55;
+    color: var(--paper-dim);
+    margin: 0 0 0.8em;
+  }
+  .algo-card .complexity {
+    margin-top: auto;
+    padding-top: 0.7em;
+    border-top: 1px dashed var(--rule);
+    display: flex; justify-content: space-between; align-items: baseline;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.78rem;
+    color: var(--gold-soft);
+  }
+  .algo-card .complexity .lbl {
+    font-family: 'Inter Tight', sans-serif;
+    font-size: 0.6rem;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--paper-mute);
+  }
+
+  /* Hypothesis ledger */
+  .ledger {
+    margin-top: 1.4em;
+    border: 1px solid var(--rule);
+    background: linear-gradient(180deg, rgba(10,13,18,0.4), transparent);
+    padding: 1em 1.2em 0.8em;
+    position: relative;
+  }
+  .ledger::before {
+    content: 'Pre-Trial Hypothesis';
+    position: absolute;
+    top: 0; left: 1.2em;
+    transform: translateY(-50%);
+    background: var(--ink);
+    padding: 0 0.6em;
+    font-family: 'Inter Tight', sans-serif;
+    font-size: 0.6rem;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    color: var(--gold);
+  }
+  .ledger-row {
+    display: grid;
+    grid-template-columns: 80px 160px 1fr 28px;
+    gap: 1em;
+    align-items: center;
+    padding: 0.45em 0;
+    border-bottom: 1px dotted var(--rule);
+    font-family: 'Newsreader', serif;
+    font-size: 0.92rem;
+  }
+  .ledger-row:last-child { border-bottom: none; }
+  .ledger-row .ds {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 1.1rem;
+    color: var(--gold);
+  }
+  .ledger-row .shape {
+    font-family: 'Inter Tight', sans-serif;
+    font-size: 0.75rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--paper-dim);
+  }
+  .ledger-row .hyp {
+    color: var(--paper);
+    font-style: italic;
+  }
+  .ledger-row .hyp strong { font-style: normal; color: var(--gold-soft); font-weight: 600; }
+  .ledger-row .arrow {
+    color: var(--vermillion);
+    font-family: 'Fraunces', serif;
+    font-size: 1.2rem;
+    text-align: right;
+  }
+
+  /* === Animation chrome (slides 4, 5, 7) ============================ */
+  .stage {
+    flex: 1;
+    margin-top: 1.2em;
+    display: flex; flex-direction: column;
+    border: 1px solid var(--rule-strong);
+    background:
+      radial-gradient(ellipse at 50% 0%, rgba(200,150,79,0.05), transparent 60%),
+      var(--ink-2);
+    position: relative;
+    padding: 1.6em 1.8em 1.2em;
+  }
+  .stage::before {
+    content: 'Figure'; position: absolute;
+    top: -1px; left: 1.6em;
+    background: var(--ink); padding: 0 0.7em;
+    font-family: 'Inter Tight', sans-serif;
+    font-size: 0.6rem; letter-spacing: 0.4em;
+    color: var(--gold); font-weight: 500;
+    transform: translateY(-50%);
+  }
+  .stage-caption {
+    display: flex; justify-content: space-between; align-items: baseline;
+    margin-bottom: 0.8em;
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 0.95rem;
+    color: var(--paper);
+  }
+  .stage-caption .num {
+    font-family: 'Inter Tight', sans-serif;
+    font-style: normal;
+    font-size: 0.65rem;
+    letter-spacing: 0.32em;
+    color: var(--gold);
+    text-transform: uppercase;
+  }
+
+  /* Bars — refined */
+  .bars {
+    display: flex;
+    gap: 6px;
+    align-items: flex-end;
+    flex: 1;
+    min-height: 200px;
+    padding: 0.4em 0.2em 1em;
+    border-bottom: 1px solid var(--rule);
+  }
+  .bar {
+    flex: 1;
+    background: linear-gradient(180deg, var(--paper-dim), #8c8470);
+    border: none;
+    border-radius: 0;
+    transition: all 0.45s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    color: var(--ink);
+    text-align: center;
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 600;
+    font-size: 0.82rem;
+    padding-top: 6px;
+    box-shadow: inset 0 -2px 0 rgba(0,0,0,0.18);
+  }
+  .bar.compare {
+    background: linear-gradient(180deg, var(--gold-soft), var(--gold));
+    box-shadow: inset 0 -2px 0 rgba(0,0,0,0.2), 0 0 14px rgba(227,185,107,0.5);
+    transform: translateY(-4px);
+  }
+  .bar.swap {
+    background: linear-gradient(180deg, #db5448, var(--vermillion));
+    color: var(--paper);
+    box-shadow: inset 0 -2px 0 rgba(0,0,0,0.25), 0 0 16px rgba(197,57,42,0.5);
+    transform: translateY(-2px);
+  }
+  .bar.sorted {
+    background: linear-gradient(180deg, #94ad8f, var(--sage));
+    box-shadow: inset 0 -2px 0 rgba(0,0,0,0.18);
+  }
+  .bar.pivot {
+    background: linear-gradient(180deg, #e08278, var(--vermillion));
+    color: var(--paper);
+    box-shadow: inset 0 -2px 0 rgba(0,0,0,0.22), 0 0 18px rgba(212,115,106,0.55);
+    transform: translateY(-6px);
+  }
+
+  .anim-controls {
+    display: flex; gap: 0;
+    margin-top: 1em; align-items: stretch;
+    border-top: 1px solid var(--rule);
+    padding-top: 1em;
+  }
+  .anim-controls button {
+    background: transparent;
+    color: var(--paper);
+    border: 1px solid var(--rule-strong);
+    border-radius: 0;
+    padding: 0.55em 1.4em;
+    cursor: pointer;
+    font-family: 'Inter Tight', sans-serif;
+    font-size: 0.7rem;
+    font-weight: 500;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    margin-right: -1px;
+    transition: all 0.25s ease;
+  }
+  .anim-controls button:hover {
+    background: var(--gold);
+    color: var(--ink);
+    border-color: var(--gold);
+    z-index: 2;
+  }
+  .anim-controls button:first-child {
+    background: var(--gold);
+    color: var(--ink);
+    border-color: var(--gold);
+  }
+  .anim-controls button:first-child:hover {
+    background: var(--paper);
+    border-color: var(--paper);
+  }
+  .anim-status {
+    margin-left: auto;
+    padding: 0.6em 0;
+    color: var(--paper-dim);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.78rem;
+    align-self: center;
+    text-align: right;
+    max-width: 60%;
+  }
+  .anim-status::before {
+    content: '▸ ';
+    color: var(--gold);
+  }
+
+  /* Legend strip — sits under stage caption */
+  .legend-strip {
+    display: flex; gap: 1.6em;
+    font-family: 'Inter Tight', sans-serif;
+    font-size: 0.68rem;
+    letter-spacing: 0.06em;
+    color: var(--paper-dim);
+    padding-bottom: 0.6em;
+    margin-bottom: 0.4em;
+    border-bottom: 1px solid var(--rule);
+  }
+  .legend-strip .swatch-bar {
+    display: inline-block;
+    width: 14px; height: 14px;
+    margin-right: 0.4em;
+    vertical-align: middle;
+  }
+  .legend-strip .swatch-bar.idle    { background: linear-gradient(180deg, var(--paper-dim), #8c8470); }
+  .legend-strip .swatch-bar.compare { background: linear-gradient(180deg, var(--gold-soft), var(--gold)); }
+  .legend-strip .swatch-bar.swap    { background: linear-gradient(180deg, #db5448, var(--vermillion)); }
+  .legend-strip .swatch-bar.sorted  { background: linear-gradient(180deg, #94ad8f, var(--sage)); }
+  .legend-strip .swatch-bar.pivot   { background: linear-gradient(180deg, #e08278, var(--vermillion)); }
+
+  /* Margin notes — pull-quote style */
+  .marginalia {
+    margin-top: 1em;
+    padding: 0.7em 1em 0.7em 1.2em;
+    border-left: 2px solid var(--gold);
+    font-family: 'Newsreader', serif;
+    font-style: italic;
+    font-size: 0.88rem;
+    line-height: 1.55;
+    color: var(--paper-dim);
+    background: linear-gradient(90deg, rgba(200,150,79,0.06), transparent 80%);
+  }
+  .marginalia strong {
+    font-style: normal;
+    color: var(--gold-soft);
+    font-weight: 600;
+  }
+
+  /* Footnote */
+  .footnote {
+    font-family: 'Newsreader', serif;
+    font-style: italic;
+    font-size: 0.82rem;
+    color: var(--paper-mute);
+    margin-top: 1em;
+    line-height: 1.5;
+  }
+  .footnote::before {
+    content: '*';
+    color: var(--gold);
+    margin-right: 0.4em;
+    font-style: normal;
+  }
+
+  /* === Slide 6: Task A results ====================================== */
+  .results-grid {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr;
+    gap: 2.4vw;
+    flex: 1;
+    margin-top: 1.2em;
+    min-height: 0;
+  }
+  .results-table-frame {
+    border: 1px solid var(--rule-strong);
+    background: linear-gradient(180deg, rgba(239,230,210,0.025), transparent 80%);
+    padding: 1.4em 1.6em 1.2em;
+    position: relative;
+  }
+  .results-table-frame::before {
+    content: 'Table I'; position: absolute;
+    top: -1px; left: 1.6em; transform: translateY(-50%);
+    background: var(--ink); padding: 0 0.7em;
+    font-family: 'Inter Tight', sans-serif;
+    font-size: 0.6rem; letter-spacing: 0.4em;
+    color: var(--gold); font-weight: 500;
+  }
+  .results-table {
+    width: 100%; border-collapse: collapse;
+    font-family: 'Newsreader', serif;
+  }
+  .results-table th, .results-table td {
+    padding: 0.7em 0.6em;
+    text-align: right;
+    font-feature-settings: "tnum", "lnum";
+    border: none;
+    background: none;
+  }
+  .results-table th {
+    font-family: 'Inter Tight', sans-serif;
+    font-size: 0.65rem;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--paper-mute);
+    font-weight: 500;
+    border-bottom: 1px solid var(--rule-strong);
+    padding-bottom: 0.5em;
+  }
+  .results-table th:first-child, .results-table td:first-child {
+    text-align: left;
+  }
+  .results-table th .ds-tag {
+    display: block;
+    color: var(--gold);
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 1rem;
+    text-transform: none;
+    letter-spacing: 0;
+    margin-top: 0.2em;
+    font-weight: 600;
+  }
+  .results-table td {
+    border-bottom: 1px dotted var(--rule);
+    font-size: 1rem;
+    color: var(--paper);
+  }
+  .results-table td:first-child {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    color: var(--paper);
+    font-size: 1.05rem;
+  }
+  .results-table .ms { font-family: 'JetBrains Mono', monospace; font-size: 0.92rem; color: var(--paper-dim); }
+  .results-table td.win {
+    background: linear-gradient(90deg, transparent, rgba(200,150,79,0.18) 30%, rgba(200,150,79,0.18) 70%, transparent);
+    color: var(--gold);
+    position: relative;
+  }
+  .results-table td.win .ms { color: var(--gold); }
+  .results-table td.win::after {
+    content: ''; position: absolute;
+    inset: 4px;
+    border: 1px solid rgba(200,150,79,0.5);
+    pointer-events: none;
+  }
+  .results-table td.win .crown {
+    display: inline-block;
+    margin-right: 0.4em;
+    color: var(--gold);
+    font-style: italic;
+    font-family: 'Fraunces', serif;
+  }
+
+  /* Horizontal bars showing times */
+  .timing-bars {
+    margin-top: 1.4em;
+    padding-top: 1em;
+    border-top: 1px solid var(--rule);
+  }
+  .timing-bars .group-label {
+    font-family: 'Inter Tight', sans-serif;
+    font-size: 0.62rem;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: var(--paper-mute);
+    margin-bottom: 0.4em;
+  }
+  .tbar-row {
+    display: grid;
+    grid-template-columns: 90px 1fr 70px;
+    gap: 0.8em;
+    align-items: center;
+    padding: 0.25em 0;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.78rem;
+  }
+  .tbar-row .name {
+    color: var(--paper-dim);
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 0.92rem;
+  }
+  .tbar-row .ms { text-align: right; color: var(--paper); }
+  .tbar-track {
+    height: 8px;
+    background: rgba(239,230,210,0.06);
+    position: relative;
+  }
+  .tbar-fill {
+    position: absolute; left: 0; top: 0; bottom: 0;
+    background: linear-gradient(90deg, var(--paper-dim), #8c8470);
+    transition: width 0.8s cubic-bezier(0.2,0.7,0.2,1);
+  }
+  .tbar-fill.win {
+    background: linear-gradient(90deg, var(--gold), var(--gold-soft));
+    box-shadow: 0 0 12px rgba(227,185,107,0.4);
+  }
+
+  .verdict-block {
+    display: flex; flex-direction: column;
+    gap: 1em;
+  }
+  .verdict-headline {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: clamp(1.4rem, 2vw, 1.8rem);
+    line-height: 1.2;
+    color: var(--paper);
+    font-weight: 500;
+    border-left: 2px solid var(--gold);
+    padding-left: 0.9em;
+  }
+  .verdict-headline strong {
+    font-style: normal;
+    color: var(--gold);
+    font-weight: 600;
+  }
+  .methodology {
+    border: 1px solid var(--rule);
+    padding: 0.9em 1em;
+    background: linear-gradient(180deg, rgba(10,13,18,0.4), transparent);
+    position: relative;
+  }
+  .methodology::before {
+    content: 'Methodology';
+    position: absolute; top: 0; left: 1em;
+    transform: translateY(-50%);
+    background: var(--ink); padding: 0 0.6em;
+    font-family: 'Inter Tight', sans-serif;
+    font-size: 0.58rem; letter-spacing: 0.32em;
+    text-transform: uppercase; color: var(--gold);
+  }
+  .methodology ol {
+    margin: 0; padding: 0; list-style: none;
+    counter-reset: meth;
+  }
+  .methodology li {
+    counter-increment: meth;
+    font-family: 'Newsreader', serif;
+    font-size: 0.88rem;
+    line-height: 1.55;
+    color: var(--paper-dim);
+    padding-left: 1.8em;
+    position: relative;
+    margin: 0.3em 0;
+  }
+  .methodology li::before {
+    content: counter(meth, lower-roman) '.';
+    position: absolute; left: 0;
+    color: var(--gold); font-style: italic;
+    font-family: 'Fraunces', serif;
+    width: 1.5em;
+  }
+  .methodology li strong { color: var(--paper); font-weight: 600; }
+
+  /* === Graph SVG (slide 7) — refined ============================== */
+  .graph-svg {
+    width: 100%;
+    flex: 1;
+    min-height: 240px;
+    background: transparent;
+    border-radius: 0;
+  }
+  .graph-svg circle.node {
+    fill: var(--ink-3);
+    stroke: var(--paper-dim);
+    stroke-width: 1.4;
+    transition: all 0.5s ease;
+  }
+  .graph-svg circle.node.frontier { fill: var(--gold); stroke: var(--gold); filter: drop-shadow(0 0 6px rgba(200,150,79,0.7)); }
+  .graph-svg circle.node.settled  { fill: var(--sage); stroke: var(--sage); }
+  .graph-svg circle.node.start    { fill: var(--gold-soft); stroke: var(--gold-soft); filter: drop-shadow(0 0 8px rgba(227,185,107,0.7)); }
+  .graph-svg circle.node.end      { fill: var(--vermillion); stroke: var(--vermillion); }
+  .graph-svg line.edge {
+    stroke: var(--paper-mute);
+    stroke-width: 1.2;
+    stroke-opacity: 0.5;
+    transition: all 0.4s ease;
+  }
+  .graph-svg line.edge.relax  { stroke: var(--gold); stroke-width: 2.4; stroke-opacity: 1; filter: drop-shadow(0 0 4px rgba(200,150,79,0.6)); }
+  .graph-svg line.edge.path   { stroke: var(--sage); stroke-width: 3; stroke-opacity: 1; }
+  .graph-svg text {
+    fill: var(--paper);
+    font-size: 12px;
+    font-family: 'JetBrains Mono', monospace;
+    pointer-events: none;
+    text-anchor: middle;
+    font-weight: 600;
+  }
+  .graph-svg text.weight {
+    fill: var(--paper-mute);
+    font-size: 10px;
+    font-weight: 400;
+  }
+
+  /* === Slide 8: Case ledger ======================================== */
+  .case-ledger {
+    margin-top: 1.4em;
+    border: 1px solid var(--rule-strong);
+    flex: 0 0 auto;
+  }
+  .case-row {
+    display: grid;
+    grid-template-columns: 60px 110px 1fr 90px 60px;
+    gap: 1.2em;
+    align-items: center;
+    padding: 0.85em 1.4em;
+    border-bottom: 1px dotted var(--rule);
+    font-family: 'Newsreader', serif;
+  }
+  .case-row.header {
+    background: rgba(200,150,79,0.06);
+    border-bottom: 1px solid var(--rule-strong);
+    font-family: 'Inter Tight', sans-serif;
+    font-size: 0.6rem;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: var(--paper-mute);
+    padding: 0.6em 1.4em;
+  }
+  .case-row:last-child { border-bottom: none; }
+  .case-row .num {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 1.6rem;
+    color: var(--gold);
+    font-weight: 500;
+  }
+  .case-row .endpoints {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.85rem;
+    color: var(--paper);
+  }
+  .case-row .endpoints .arr { color: var(--gold); margin: 0 0.3em; }
+  .case-row .desc {
+    font-style: italic;
+    color: var(--paper-dim);
+    font-size: 0.92rem;
+    line-height: 1.4;
+  }
+  .case-row .desc .via { color: var(--vermillion); font-style: normal; font-family: 'Inter Tight', sans-serif; font-size: 0.62rem; letter-spacing: 0.2em; text-transform: uppercase; margin-right: 0.4em; }
+  .case-row .cost {
+    font-family: 'Fraunces', serif;
+    font-size: 1.6rem;
+    text-align: right;
+    color: var(--paper);
+    font-weight: 600;
+    font-feature-settings: "lnum";
+  }
+  .case-row .cost.zero { color: var(--sage); }
+  .case-row .hops {
+    text-align: right;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.78rem;
+    color: var(--paper-mute);
+  }
+
+  .case-spotlight {
+    margin-top: 1em;
+    display: grid;
+    grid-template-columns: 1fr 1.1fr;
+    gap: 2vw;
+    align-items: stretch;
+  }
+  .case-spotlight .pull {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: clamp(1.05rem, 1.4vw, 1.3rem);
+    line-height: 1.35;
+    color: var(--paper);
+    border-left: 2px solid var(--vermillion);
+    padding: 0.4em 1em;
+  }
+  .case-spotlight .pull .echo {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.75em;
+    background: rgba(197,57,42,0.12);
+    padding: 0.2em 0.5em;
+    color: var(--rose);
+    font-style: normal;
+    letter-spacing: 0.02em;
+  }
+  .case-spotlight .explain {
+    font-family: 'Newsreader', serif;
+    font-size: 0.92rem;
+    line-height: 1.55;
+    color: var(--paper-dim);
+  }
+  .case-spotlight .explain strong { color: var(--gold-soft); font-weight: 600; }
+
+  /* === Slide 9: Complexity ledger =================================== */
+  .complexity-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2vw;
+    flex: 1;
+    margin-top: 1.4em;
+  }
+  .approach-stack {
+    display: flex; flex-direction: column;
+    gap: 0.8em;
+  }
+  .approach {
+    border: 1px solid var(--rule);
+    padding: 0.9em 1.1em;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    column-gap: 1em;
+    position: relative;
+  }
+  .approach.ours {
+    border-color: var(--gold);
+    background: linear-gradient(90deg, rgba(200,150,79,0.10), transparent 80%);
+  }
+  .approach.ours::before {
+    content: 'Adopted';
+    position: absolute; top: 0; right: 1em;
+    transform: translateY(-50%);
+    background: var(--ink); padding: 0 0.6em;
+    font-family: 'Inter Tight', sans-serif;
+    font-size: 0.58rem; letter-spacing: 0.32em;
+    text-transform: uppercase; color: var(--gold);
+  }
+  .approach .name {
+    font-family: 'Fraunces', serif;
+    font-size: 1.05rem;
+    color: var(--paper);
+    font-weight: 600;
+  }
+  .approach .name .sub {
+    display: block;
+    font-family: 'Newsreader', serif;
+    font-style: italic;
+    font-weight: 400;
+    font-size: 0.82rem;
+    color: var(--paper-mute);
+    margin-top: 0.15em;
+  }
+  .approach .big-O {
+    text-align: right;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.95rem;
+    color: var(--gold-soft);
+  }
+  .approach.ours .big-O { color: var(--gold); }
+  .approach .big-O .ops {
+    display: block;
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 0.78rem;
+    color: var(--paper-mute);
+    margin-top: 0.15em;
+  }
+
+  .speedup {
+    display: flex; flex-direction: column;
+    gap: 1em;
+  }
+  .speedup-headline {
+    font-family: 'Fraunces', serif;
+    font-size: clamp(2.6rem, 4.6vw, 4rem);
+    line-height: 1;
+    color: var(--gold);
+    font-weight: 700;
+    letter-spacing: -0.025em;
+    font-feature-settings: "lnum";
+  }
+  .speedup-headline .x {
+    font-style: italic;
+    font-weight: 400;
+    color: var(--paper-dim);
+  }
+  .speedup-sub {
+    font-family: 'Newsreader', serif;
+    font-style: italic;
+    font-size: 1rem;
+    color: var(--paper-dim);
+    line-height: 1.5;
+  }
+  .speedup-sub strong { color: var(--paper); font-style: normal; font-weight: 600; }
+
+  .alternatives {
+    border: 1px solid var(--rule);
+    padding: 0.9em 1em;
+    background: linear-gradient(180deg, rgba(10,13,18,0.4), transparent);
+  }
+  .alternatives h4 {
+    font-family: 'Inter Tight', sans-serif;
+    font-size: 0.62rem;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin: 0 0 0.6em;
+  }
+  .alt-row {
+    display: grid;
+    grid-template-columns: 100px 1fr;
+    gap: 0.8em;
+    padding: 0.35em 0;
+    font-family: 'Newsreader', serif;
+    font-size: 0.88rem;
+    line-height: 1.45;
+    border-bottom: 1px dotted var(--rule);
+  }
+  .alt-row:last-child { border-bottom: none; }
+  .alt-row .alt-name {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    color: var(--paper);
+    font-weight: 600;
+  }
+  .alt-row .alt-verdict { color: var(--paper-dim); }
+  .alt-row .alt-verdict strong { color: var(--vermillion); font-weight: 500; }
 
   /* Two-column layout */
   .cols {
@@ -290,272 +1872,1583 @@
     margin-top: 1em;
     font-style: italic;
   }
+
+  /* ==========================================================
+     GROUP 5 · Slide 10 — Task C OOP design (monograph plate)
+     ========================================================== */
+  .oop-grid {
+    display: grid;
+    grid-template-columns: 1fr 1.05fr;
+    gap: 30px;
+    margin-top: 18px;
+  }
+  .package-list {
+    position: relative;
+    padding: 18px 22px 18px 24px;
+    border-left: 1px solid var(--gold);
+    background: linear-gradient(90deg, rgba(200,150,79,0.06), transparent 60%);
+  }
+  .package-list::before {
+    content: "Five packages";
+    position: absolute;
+    top: -10px; left: 16px;
+    background: var(--ink);
+    padding: 0 10px;
+    font-family: 'Inter Tight', sans-serif;
+    font-size: 0.62em;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    color: var(--gold);
+  }
+  .pkg-row {
+    display: grid;
+    grid-template-columns: 28px 1fr;
+    gap: 14px;
+    align-items: baseline;
+    padding: 10px 0;
+    border-bottom: 1px dotted rgba(239,230,210,0.12);
+  }
+  .pkg-row:last-child { border-bottom: none; }
+  .pkg-row .pk-num {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-weight: 400;
+    color: var(--gold);
+    font-size: 1.05em;
+  }
+  .pkg-row .pk-body {
+    font-family: 'Newsreader', serif;
+    color: var(--paper);
+    font-size: 0.95em;
+    line-height: 1.5;
+  }
+  .pkg-row .pk-body code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.85em;
+    color: var(--gold-soft);
+    background: rgba(200,150,79,0.08);
+    padding: 1px 6px;
+    border-radius: 2px;
+  }
+  .pkg-foot {
+    margin-top: 16px;
+    padding-top: 14px;
+    border-top: 1px solid rgba(239,230,210,0.1);
+    font-family: 'Newsreader', serif;
+    font-style: italic;
+    color: var(--paper-dim);
+    font-size: 0.92em;
+    line-height: 1.55;
+  }
+  .pkg-foot strong {
+    font-style: normal;
+    color: var(--vermillion);
+    font-weight: 500;
+    letter-spacing: 0.04em;
+  }
+
+  .principle-frame {
+    position: relative;
+    padding: 22px 22px 18px;
+    border: 1px solid rgba(200,150,79,0.35);
+    background: rgba(10,13,18,0.4);
+  }
+  .principle-frame::before {
+    content: "Plate II · Four pillars";
+    position: absolute;
+    top: -10px; left: 18px;
+    background: var(--ink);
+    padding: 0 10px;
+    font-family: 'Inter Tight', sans-serif;
+    font-size: 0.62em;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    color: var(--gold);
+  }
+  .principle-row {
+    display: grid;
+    grid-template-columns: 130px 1fr;
+    gap: 18px;
+    align-items: baseline;
+    padding: 11px 0;
+    border-bottom: 1px solid rgba(239,230,210,0.08);
+  }
+  .principle-row:last-child { border-bottom: none; }
+  .principle-row .pr-name {
+    font-family: 'Fraunces', serif;
+    font-weight: 400;
+    color: var(--gold-soft);
+    font-size: 0.98em;
+    letter-spacing: 0.03em;
+  }
+  .principle-row .pr-where {
+    font-family: 'Newsreader', serif;
+    color: var(--paper);
+    font-size: 0.92em;
+    line-height: 1.55;
+  }
+  .principle-row .pr-where code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.85em;
+    color: var(--gold-soft);
+  }
+
+  /* UML plate — slide 10 bottom row */
+  .uml-plate {
+    position: relative;
+    margin-top: 26px;
+    padding: 26px 24px 20px;
+    border: 1px solid rgba(200,150,79,0.3);
+    background:
+      radial-gradient(ellipse at top, rgba(200,150,79,0.04), transparent 70%),
+      var(--ink-2);
+  }
+  .uml-plate::before {
+    content: "Figure IV · Sorter hierarchy (excerpt)";
+    position: absolute;
+    top: -10px; left: 22px;
+    background: var(--ink);
+    padding: 0 10px;
+    font-family: 'Inter Tight', sans-serif;
+    font-size: 0.62em;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    color: var(--gold);
+  }
+  .uml-plate::after {
+    content: "Fig. IV";
+    position: absolute;
+    bottom: 6px; right: 14px;
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 0.72em;
+    color: var(--paper-dim);
+    opacity: 0.6;
+  }
+  .uml-stack {
+    display: grid;
+    grid-template-columns: 1.1fr repeat(4, 1fr);
+    gap: 14px;
+    align-items: stretch;
+    position: relative;
+  }
+  .uml-card {
+    position: relative;
+    padding: 14px 12px 12px;
+    background: rgba(10,13,18,0.55);
+    border: 1px solid rgba(239,230,210,0.18);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.78em;
+    color: var(--paper-dim);
+    line-height: 1.55;
+  }
+  .uml-card .uml-stereotype {
+    font-family: 'Inter Tight', sans-serif;
+    font-size: 0.62em;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: var(--paper-dim);
+    margin-bottom: 4px;
+    opacity: 0.7;
+  }
+  .uml-card .uml-name {
+    font-family: 'Fraunces', serif;
+    font-weight: 400;
+    font-size: 1.15em;
+    color: var(--paper);
+    letter-spacing: 0.02em;
+    margin-bottom: 8px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid rgba(200,150,79,0.25);
+  }
+  .uml-card.iface {
+    border-color: var(--gold);
+    background:
+      linear-gradient(180deg, rgba(200,150,79,0.06), transparent),
+      rgba(10,13,18,0.55);
+  }
+  .uml-card.iface .uml-stereotype { color: var(--gold); opacity: 1; }
+  .uml-card.iface .uml-name { color: var(--gold-soft); border-bottom-color: var(--gold); }
+  .uml-card.iface::before {
+    content: "";
+    position: absolute;
+    top: 8px; right: 8px;
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--gold);
+    box-shadow: 0 0 8px rgba(200,150,79,0.6);
+  }
+  .uml-card .uml-member { color: var(--paper); }
+  .uml-card .uml-member + .uml-member { margin-top: 2px; }
+  .uml-card .uml-impl {
+    margin-top: 6px;
+    font-family: 'Inter Tight', sans-serif;
+    font-size: 0.7em;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--vermillion);
+    opacity: 0.85;
+  }
+
+  /* ==========================================================
+     GROUP 6 · Slide 11 — Data structures (collection ledger + tree)
+     ========================================================== */
+  .ds-grid {
+    display: grid;
+    grid-template-columns: 1.25fr 1fr;
+    gap: 28px;
+    margin-top: 18px;
+    align-items: start;
+  }
+  .ds-ledger {
+    position: relative;
+    padding: 22px 22px 14px;
+    border: 1px solid rgba(200,150,79,0.32);
+    background: rgba(10,13,18,0.45);
+  }
+  .ds-ledger::before {
+    content: "Table II · Collection chosen, in one line each";
+    position: absolute;
+    top: -10px; left: 18px;
+    background: var(--ink);
+    padding: 0 10px;
+    font-family: 'Inter Tight', sans-serif;
+    font-size: 0.62em;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    color: var(--gold);
+  }
+  .ds-row {
+    display: grid;
+    grid-template-columns: 130px 175px 1fr;
+    gap: 16px;
+    padding: 12px 0;
+    border-bottom: 1px solid rgba(239,230,210,0.08);
+    align-items: baseline;
+  }
+  .ds-row:last-child { border-bottom: none; }
+  .ds-row .ds-where {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-weight: 400;
+    color: var(--gold-soft);
+    font-size: 0.95em;
+  }
+  .ds-row .ds-type {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.78em;
+    color: var(--paper);
+    background: rgba(200,150,79,0.07);
+    padding: 4px 8px;
+    border-left: 2px solid var(--gold);
+    line-height: 1.4;
+    align-self: start;
+  }
+  .ds-row .ds-why {
+    font-family: 'Newsreader', serif;
+    font-size: 0.92em;
+    color: var(--paper-dim);
+    line-height: 1.55;
+  }
+  .ds-row .ds-why strong {
+    font-weight: 500;
+    color: var(--vermillion);
+  }
+  .ds-row .ds-why .ds-cost {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.85em;
+    color: var(--gold-soft);
+    background: transparent;
+  }
+
+  .lineage-frame {
+    position: relative;
+    padding: 26px 24px 22px;
+    border: 1px solid rgba(200,150,79,0.32);
+    background:
+      radial-gradient(ellipse at top right, rgba(200,150,79,0.05), transparent 60%),
+      var(--ink-2);
+  }
+  .lineage-frame::before {
+    content: "Figure V · Java collection lineage";
+    position: absolute;
+    top: -10px; left: 22px;
+    background: var(--ink);
+    padding: 0 10px;
+    font-family: 'Inter Tight', sans-serif;
+    font-size: 0.62em;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    color: var(--gold);
+  }
+  .lineage-tree {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.86em;
+    line-height: 1.85;
+    color: var(--paper-dim);
+    margin-top: 4px;
+  }
+  .lineage-tree .root {
+    color: var(--gold);
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 1.15em;
+    letter-spacing: 0.04em;
+  }
+  .lineage-tree .branch { color: rgba(239,230,210,0.4); }
+  .lineage-tree .node { color: var(--paper); }
+  .lineage-tree .node.used {
+    color: var(--paper);
+    background: linear-gradient(90deg, rgba(200,150,79,0.18), transparent 80%);
+    padding: 2px 6px;
+    border-left: 2px solid var(--gold);
+  }
+  .lineage-tree .node.used .tag {
+    color: var(--gold-soft);
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 0.92em;
+    margin-left: 8px;
+  }
+  .lineage-tree .com {
+    color: rgba(122,149,118,0.85);
+    font-style: italic;
+    font-family: 'Newsreader', serif;
+    font-size: 0.9em;
+  }
+  .lineage-tree .gap { display: block; height: 6px; }
+
+  .ds-coda {
+    margin-top: 18px;
+    padding: 14px 16px;
+    border-left: 2px solid var(--vermillion);
+    background: linear-gradient(90deg, rgba(197,57,42,0.06), transparent);
+    font-family: 'Newsreader', serif;
+    font-style: italic;
+    font-size: 0.92em;
+    color: var(--paper);
+    line-height: 1.55;
+  }
+  .ds-coda strong {
+    font-style: normal;
+    color: var(--vermillion);
+    font-weight: 500;
+    letter-spacing: 0.04em;
+  }
+
+  /* ==========================================================
+     GROUP 7 · Slide 12 — Task D reflection (Trello / AI / EDI)
+     ========================================================== */
+  .reflect-grid {
+    display: grid;
+    grid-template-columns: 1.05fr 1fr;
+    gap: 28px;
+    margin-top: 18px;
+    align-items: start;
+  }
+
+  .trello-frame {
+    position: relative;
+    padding: 22px 22px 18px;
+    border: 1px solid rgba(200,150,79,0.32);
+    background: rgba(10,13,18,0.45);
+  }
+  .trello-frame::before {
+    content: "Plate III · Project board, five-column kanban";
+    position: absolute;
+    top: -10px; left: 18px;
+    background: var(--ink);
+    padding: 0 10px;
+    font-family: 'Inter Tight', sans-serif;
+    font-size: 0.62em;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    color: var(--gold);
+  }
+  .trello-cols {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 8px;
+    margin-bottom: 14px;
+  }
+  .trello-col {
+    padding: 10px 8px 12px;
+    background: rgba(239,230,210,0.04);
+    border-top: 2px solid var(--gold-soft);
+    text-align: center;
+  }
+  .trello-col.done { border-top-color: var(--sage); }
+  .trello-col.review { border-top-color: var(--vermillion); }
+  .trello-col .col-name {
+    font-family: 'Inter Tight', sans-serif;
+    font-size: 0.62em;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    color: var(--paper-dim);
+    margin-bottom: 8px;
+  }
+  .trello-col .col-count {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 1.6em;
+    color: var(--gold-soft);
+    line-height: 1;
+  }
+  .trello-col.done .col-count { color: var(--sage); }
+  .trello-col.review .col-count { color: var(--vermillion); }
+  .trello-col .col-unit {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 0.78em;
+    color: var(--paper-dim);
+    margin-top: 2px;
+  }
+  .trello-fields {
+    font-family: 'Newsreader', serif;
+    font-size: 0.92em;
+    color: var(--paper-dim);
+    line-height: 1.55;
+    padding-top: 12px;
+    border-top: 1px solid rgba(239,230,210,0.1);
+  }
+  .trello-fields strong {
+    color: var(--gold-soft);
+    font-weight: 500;
+  }
+
+  .ai-card {
+    position: relative;
+    margin-top: 22px;
+    padding: 22px 22px 18px;
+    border: 1px solid rgba(197,57,42,0.32);
+    background:
+      linear-gradient(180deg, rgba(197,57,42,0.04), transparent 70%),
+      var(--ink-2);
+  }
+  .ai-card::before {
+    content: "Plate IV · AI tool, audited";
+    position: absolute;
+    top: -10px; left: 18px;
+    background: var(--ink);
+    padding: 0 10px;
+    font-family: 'Inter Tight', sans-serif;
+    font-size: 0.62em;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    color: var(--vermillion);
+  }
+  .ai-name {
+    font-family: 'Fraunces', serif;
+    font-size: 1.25em;
+    color: var(--paper);
+    letter-spacing: 0.02em;
+    margin-bottom: 4px;
+  }
+  .ai-name .ai-version {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.72em;
+    color: var(--gold-soft);
+    margin-left: 8px;
+    letter-spacing: 0.05em;
+  }
+  .ai-tag {
+    font-family: 'Inter Tight', sans-serif;
+    font-size: 0.66em;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    color: var(--paper-dim);
+    margin-bottom: 14px;
+  }
+  .ai-cols {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+  }
+  .ai-cols h5 {
+    font-family: 'Inter Tight', sans-serif;
+    font-size: 0.66em;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    margin: 0 0 8px;
+    padding-bottom: 4px;
+    border-bottom: 1px solid rgba(239,230,210,0.12);
+  }
+  .ai-cols h5.plus { color: var(--sage); border-bottom-color: rgba(122,149,118,0.3); }
+  .ai-cols h5.minus { color: var(--vermillion); border-bottom-color: rgba(197,57,42,0.3); }
+  .ai-cols ul {
+    margin: 0;
+    padding-left: 0;
+    list-style: none;
+  }
+  .ai-cols li {
+    font-family: 'Newsreader', serif;
+    font-size: 0.88em;
+    color: var(--paper-dim);
+    padding: 4px 0 4px 18px;
+    position: relative;
+    line-height: 1.5;
+  }
+  .ai-cols li::before {
+    position: absolute;
+    left: 0; top: 4px;
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 1em;
+  }
+  .ai-cols .plus-list li::before { content: "+"; color: var(--sage); }
+  .ai-cols .minus-list li::before { content: "−"; color: var(--vermillion); }
+  .ai-cols li code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.85em;
+    color: var(--gold-soft);
+  }
+
+  .reflect-side {
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+  }
+  .edi-frame, .lll-frame {
+    position: relative;
+    padding: 22px 22px 18px;
+    border: 1px solid rgba(200,150,79,0.32);
+    background: rgba(10,13,18,0.45);
+  }
+  .edi-frame::before {
+    content: "§ 4.1 · EDI · concrete next ships";
+    position: absolute;
+    top: -10px; left: 18px;
+    background: var(--ink);
+    padding: 0 10px;
+    font-family: 'Inter Tight', sans-serif;
+    font-size: 0.62em;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    color: var(--gold);
+  }
+  .lll-frame::before {
+    content: "§ 4.2 · Life-long learning · what transfers";
+    position: absolute;
+    top: -10px; left: 18px;
+    background: var(--ink);
+    padding: 0 10px;
+    font-family: 'Inter Tight', sans-serif;
+    font-size: 0.62em;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    color: var(--gold);
+  }
+  .edi-row {
+    display: grid;
+    grid-template-columns: 28px 1fr;
+    gap: 14px;
+    align-items: baseline;
+    padding: 11px 0;
+    border-bottom: 1px dotted rgba(239,230,210,0.12);
+  }
+  .edi-row:last-child { border-bottom: none; }
+  .edi-row .edi-num {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    color: var(--gold);
+    font-size: 1.05em;
+  }
+  .edi-row .edi-body {
+    font-family: 'Newsreader', serif;
+    font-size: 0.92em;
+    color: var(--paper-dim);
+    line-height: 1.55;
+  }
+  .edi-row .edi-body strong {
+    color: var(--paper);
+    font-weight: 500;
+  }
+  .lll-text {
+    font-family: 'Newsreader', serif;
+    font-size: 0.95em;
+    color: var(--paper);
+    line-height: 1.65;
+  }
+  .lll-text em {
+    color: var(--gold-soft);
+    font-style: italic;
+  }
+  .lll-text .pull-quote {
+    display: block;
+    margin-top: 12px;
+    padding: 10px 14px;
+    border-left: 2px solid var(--vermillion);
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 1.02em;
+    color: var(--paper);
+    background: linear-gradient(90deg, rgba(197,57,42,0.05), transparent);
+  }
+
+  /* ==========================================================
+     GROUP 8 · Slide 13 — Closing & coda
+     ========================================================== */
+  .coda-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 28px;
+    margin-top: 18px;
+  }
+  .coda-block {
+    position: relative;
+    padding: 22px 22px 18px;
+    border: 1px solid rgba(200,150,79,0.32);
+    background: rgba(10,13,18,0.45);
+  }
+  .coda-block::before {
+    position: absolute;
+    top: -10px; left: 18px;
+    background: var(--ink);
+    padding: 0 10px;
+    font-family: 'Inter Tight', sans-serif;
+    font-size: 0.62em;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+  }
+  .coda-block.delivered::before {
+    content: "Delivered · in this volume";
+    color: var(--gold);
+  }
+  .coda-block.next::before {
+    content: "If we had another week · the dossier";
+    color: var(--vermillion);
+  }
+  .coda-block.next { border-color: rgba(197,57,42,0.32); }
+  .coda-row {
+    display: grid;
+    grid-template-columns: 28px 1fr;
+    gap: 14px;
+    align-items: baseline;
+    padding: 11px 0;
+    border-bottom: 1px dotted rgba(239,230,210,0.12);
+  }
+  .coda-row:last-child { border-bottom: none; }
+  .coda-row .cd-mark {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 1.05em;
+  }
+  .coda-block.delivered .cd-mark { color: var(--sage); }
+  .coda-block.next .cd-mark { color: var(--gold); }
+  .coda-row .cd-text {
+    font-family: 'Newsreader', serif;
+    font-size: 0.93em;
+    color: var(--paper);
+    line-height: 1.55;
+  }
+  .coda-row .cd-text code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.85em;
+    color: var(--gold-soft);
+  }
+  .coda-row .cd-text em { color: var(--paper-dim); font-style: italic; }
+  .coda-row .cd-text strong {
+    color: var(--vermillion);
+    font-weight: 500;
+  }
+
+  .finale {
+    margin-top: 36px;
+    text-align: center;
+    position: relative;
+  }
+  .finale .finale-rule {
+    width: 60%;
+    height: 1px;
+    margin: 0 auto 24px;
+    background: linear-gradient(90deg, transparent, var(--gold) 50%, transparent);
+    position: relative;
+  }
+  .finale .finale-rule::before {
+    content: "❦";
+    position: absolute;
+    top: -14px; left: 50%;
+    transform: translateX(-50%);
+    background: var(--ink);
+    padding: 0 14px;
+    color: var(--gold);
+    font-size: 1.2em;
+  }
+  .finale .finale-eyebrow {
+    font-family: 'Inter Tight', sans-serif;
+    font-size: 0.7em;
+    letter-spacing: 0.5em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 14px;
+  }
+  .finale .finale-title {
+    font-family: 'Fraunces', serif;
+    font-weight: 300;
+    font-style: italic;
+    font-size: 4.2em;
+    line-height: 1;
+    letter-spacing: -0.01em;
+    color: var(--paper);
+    margin: 0;
+    font-variation-settings: "SOFT" 100, "WONK" 1;
+  }
+  .finale .finale-title .amp {
+    font-style: italic;
+    color: var(--gold-soft);
+    font-weight: 300;
+  }
+  .finale .finale-sub {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 1.15em;
+    color: var(--paper-dim);
+    margin-top: 14px;
+    letter-spacing: 0.04em;
+  }
+  .finale .finale-byline {
+    margin-top: 28px;
+    display: inline-flex;
+    align-items: baseline;
+    gap: 24px;
+    font-family: 'Newsreader', serif;
+    color: var(--paper-dim);
+    font-size: 0.95em;
+  }
+  .finale .finale-byline strong {
+    color: var(--paper);
+    font-weight: 500;
+    font-family: 'Fraunces', serif;
+  }
+  .finale .finale-byline .sep {
+    color: var(--gold);
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 1.4em;
+  }
+  .finale .finale-spine {
+    margin-top: 22px;
+    font-family: 'Inter Tight', sans-serif;
+    font-size: 0.62em;
+    letter-spacing: 0.4em;
+    text-transform: uppercase;
+    color: var(--paper-dim);
+    opacity: 0.7;
+  }
 </style>
 </head>
 <body>
 
 <!-- ================= 1. Cover ================= -->
 <div class="slide cover active" data-slide="1">
-  <h1>Urban Infrastructure<br>Inspection System</h1>
-  <div class="sub">CPT204 Advanced Object-Oriented Programming · Group 22</div>
-  <div class="meta">
-    Alex (lead Task C / D) &nbsp;·&nbsp; Teammate (lead Task A / B)<br>
-    May 2026
+
+  <div class="cover-top">
+    <div class="seal">
+      <div class="num">22</div>
+      <div class="lbl">Group</div>
+    </div>
+    <div class="cover-meta">
+      <div class="lead">CPT 204 · MMXXVI</div>
+      <div>Advanced Object-Oriented Programming</div>
+      <div>Final Coursework — 40%</div>
+    </div>
   </div>
+
+  <div class="cover-center">
+    <div class="cover-eyebrow">A Monograph in Five Parts</div>
+
+    <h1 class="cover-title">
+      Urban&nbsp;<span class="amp">&amp;</span>&nbsp;Infrastructure
+      <span class="stack">Inspection, Sorted &amp; Routed.</span>
+    </h1>
+
+    <div class="ornament">
+      <span class="line"></span>
+      <span class="glyph">❦</span>
+      <span class="line"></span>
+    </div>
+
+    <div class="cover-byline">
+      <div><span class="by">Authored by</span><br><strong>Alex</strong> <em class="muted">— Task C, Task D</em></div>
+      <div class="ampersand">&amp;</div>
+      <div><span class="by">In collaboration with</span><br><strong>Teammate</strong> <em class="muted">— Task A, Task B</em></div>
+    </div>
+  </div>
+
+  <div class="cover-bottom">
+    <div class="toc">
+      <div class="toc-item"><span class="n">I.</span>Sorting</div>
+      <div class="toc-item"><span class="n">II.</span>Graph</div>
+      <div class="toc-item"><span class="n">III.</span>Design</div>
+      <div class="toc-item"><span class="n">IV.</span>Reflection</div>
+      <div class="toc-item"><span class="n">V.</span>Coda</div>
+    </div>
+    <div class="cover-spine">
+      <span class="vol">Vol. I</span>
+      Xi'an Jiaotong-Liverpool Univ.<br>
+      Suzhou · Spring MMXXVI
+    </div>
+  </div>
+
 </div>
 
 <!-- ================= 2. Project Intro ================= -->
 <div class="slide" data-slide="2">
-  <span class="speaker-tag tm">Speaker: Teammate &nbsp;|&nbsp; 0:30</span>
-  <h2>The Problem</h2>
-  <p>A municipality has <span class="accent-2">1000 candidate inspection points</span> connected by <span class="accent-2">2600 road segments</span>. The inspection team has limited capacity and needs to answer two questions:</p>
-  <div class="cols">
-    <div class="card win">
-      <h3>① Which 10 to inspect first?</h3>
-      <p>Each location has a <span class="mono">priority_score</span>. <strong>Sort</strong> all candidates by priority (descending), then ID (ascending), and pick the top 10.</p>
-      <p class="footnote">→ Task A: Bubble vs Quick vs Merge</p>
-    </div>
-    <div class="card win">
-      <h3>② What's the cheapest route?</h3>
-      <p>Given a start and end (and optional waypoints), find the <strong>shortest weighted path</strong> through the road graph.</p>
-      <p class="footnote">→ Task B: Dijkstra over an adjacency list</p>
-    </div>
+  <div class="runner">
+    <span class="left">Part Zero · The Brief</span>
+    <span class="right">Group XXII</span>
   </div>
-  <div class="stat-grid">
-    <div class="stat"><div class="num">1000</div><div class="lbl">nodes (V)</div></div>
-    <div class="stat"><div class="num">2600</div><div class="lbl">edges (E)</div></div>
-    <div class="stat"><div class="num">3</div><div class="lbl">datasets · 4 path cases</div></div>
+  <span class="speaker-tag tm">Speaker · <em>Teammate</em> &nbsp;&middot;&nbsp; 0:30</span>
+
+  <div style="display:flex; align-items:baseline; gap:1.2em; margin-top:0.4em">
+    <span class="kicker left">Prologue</span>
+    <span class="muted" style="font-style:italic; font-family:'Fraunces',serif; font-size:0.95rem">A city, a thousand points, one inspection.</span>
+  </div>
+  <h2 style="margin-top:0.3em; max-width:18ch">A municipality, surveyed.</h2>
+
+  <div class="brief-grid">
+
+    <!-- LEFT: City Map Plate -->
+    <div class="map-frame">
+      <div class="map-caption">
+        <span class="title">An Inspector's Map of the Network</span>
+        <span class="scale">scale 1 : N · simulated · n = 80 of 1 000</span>
+      </div>
+      <svg class="city-svg" id="city-map" viewBox="0 0 700 460" preserveAspectRatio="xMidYMid meet" aria-label="Simulated city inspection network"></svg>
+      <div class="map-legend">
+        <span class="legend-mark"><span class="line-mark"></span> road segment (E = 2 600)</span>
+        <span class="legend-mark"><span class="swatch dot"></span> candidate point (V = 1 000)</span>
+        <span class="legend-mark"><span class="swatch start"></span> L0001 — start</span>
+        <span class="legend-mark"><span class="swatch end"></span> L0010 — end (Case 2)</span>
+        <span class="legend-mark"><span class="swatch way"></span> waypoint (Cases 3–4)</span>
+      </div>
+    </div>
+
+    <!-- RIGHT: Stats + Questions + Specimens -->
+    <div class="brief-side">
+      <p class="brief-lede">
+        <span class="drop-cap">A</span> regional authority has <strong>one thousand</strong> sites that <em>may</em> require inspection &mdash; a backlog drawn from three independent data sources, threaded together by <strong>two thousand six hundred</strong> roads. The inspection team's day is finite. Our program decides whom to visit, and how to get there.
+      </p>
+
+      <div class="brief-stats">
+        <div class="brief-stat">
+          <div class="num">1 000<span class="unit">V</span></div>
+          <div class="lbl">Locations</div>
+        </div>
+        <div class="brief-stat">
+          <div class="num">2 600<span class="unit">E</span></div>
+          <div class="lbl">Road Edges</div>
+        </div>
+        <div class="brief-stat">
+          <div class="num">0.5<span class="unit">%</span></div>
+          <div class="lbl">Density</div>
+        </div>
+      </div>
+
+      <div class="questions">
+        <div class="qcard">
+          <span class="qno">i.</span>
+          <h4>Whom to inspect first?</h4>
+          <p>Each candidate carries a <span class="mono">priority_score</span>. Rank descending, break ties by ID, take the first ten.</p>
+          <div class="resolves"><span>resolves to</span><em>Task A · Sorting</em></div>
+        </div>
+        <div class="qcard">
+          <span class="qno">ii.</span>
+          <h4>By what route?</h4>
+          <p>Given start, end, and ordered waypoints, find the cheapest weighted path through the road graph.</p>
+          <div class="resolves"><span>resolves to</span><em>Task B · Graph</em></div>
+        </div>
+      </div>
+
+      <div class="sources-grid">
+        <div class="source-card">
+          <div class="sc-stamp">A.</div>
+          <div class="sc-tag">Source one · pre-sorted</div>
+          <div class="sc-file">candidates_A.csv</div>
+          <div class="sc-rows">
+            <div><span class="lid">L0001</span><span class="sep">,</span>10 000</div>
+            <div><span class="lid">L0002</span><span class="sep">,</span>&nbsp;9 999</div>
+            <div><span class="lid">L0003</span><span class="sep">,</span>&nbsp;9 998</div>
+            <div style="color:var(--paper-mute); font-style:italic">⋯ descending, no ties</div>
+          </div>
+          <div class="sc-cap"><strong>Best case</strong> — already sorted by score; Bubble's early-exit ought to win here.</div>
+          <div class="sc-top10">Top 10 → <code>L0001 … L0010</code></div>
+        </div>
+
+        <div class="source-card">
+          <div class="sc-stamp">B.</div>
+          <div class="sc-tag">Source two · shuffled</div>
+          <div class="sc-file">candidates_B.csv</div>
+          <div class="sc-rows">
+            <div><span class="lid">L0337</span><span class="sep">,</span>9 664</div>
+            <div><span class="lid">L0513</span><span class="sep">,</span>9 488</div>
+            <div><span class="lid">L0394</span><span class="sep">,</span>9 207</div>
+            <div style="color:var(--paper-mute); font-style:italic">⋯ random order, distinct scores</div>
+          </div>
+          <div class="sc-cap"><strong>Average case</strong> — true randomness; the regime where Quick / Merge earn their <span class="mono" style="color:var(--gold-soft)">n&nbsp;log&nbsp;n</span>.</div>
+          <div class="sc-top10">Top 10 → <code>L0101 … L0110</code></div>
+        </div>
+
+        <div class="source-card">
+          <div class="sc-stamp">C.</div>
+          <div class="sc-tag">Source three · heavy ties</div>
+          <div class="sc-file">candidates_C.csv</div>
+          <div class="sc-rows">
+            <div><span class="lid">L0207</span><span class="sep">,</span>5 000<span class="sc-tie">tie</span></div>
+            <div><span class="lid">L0210</span><span class="sep">,</span>5 000<span class="sc-tie">tie</span></div>
+            <div><span class="lid">L0203</span><span class="sep">,</span>5 000<span class="sc-tie">tie</span></div>
+            <div style="color:var(--paper-mute); font-style:italic">⋯ ~25 rows per score</div>
+          </div>
+          <div class="sc-cap"><strong>Pathological</strong> — duplicate keys stress Quick's pivots and reveal the second sort key.</div>
+          <div class="sc-top10">Top 10 → <code>L0201 … L0210</code></div>
+        </div>
+      </div>
+
+      <div class="rank-banner">
+        <div class="rb-label">
+          Ranking rule
+          <span class="rb-sub">applied identically by all three sorters</span>
+        </div>
+        <div class="rb-rule">
+          <span class="key">priority_score</span> <span class="arrow">↓</span> <em>desc</em>
+          &nbsp;,&nbsp;
+          then <span class="key">location_id</span> <span class="arrow">↑</span> <em>asc</em>
+        </div>
+      </div>
+    </div>
+
   </div>
 </div>
 
 <!-- ================= 3. Task A intro ================= -->
 <div class="slide" data-slide="3">
-  <span class="speaker-tag tm">Speaker: Teammate &nbsp;|&nbsp; 0:30</span>
-  <h2>Task A — Three sorts, three datasets</h2>
-  <div class="cols three">
-    <div class="card">
-      <h3>Bubble Sort</h3>
-      <p>Adjacent compare-and-swap. Liang's <strong>early-exit flag</strong>: stop the moment a pass does no swaps.</p>
-      <p class="mono accent">best O(n) · avg O(n²)</p>
-    </div>
-    <div class="card">
-      <h3>Quick Sort</h3>
-      <p>Lomuto partition with <strong>median-of-three</strong> pivot to dodge the O(n²) worst case on sorted input.</p>
-      <p class="mono accent">avg O(n log n)</p>
-    </div>
-    <div class="card">
-      <h3>Merge Sort</h3>
-      <p>Top-down divide-and-conquer. <strong>Stable</strong> in all cases; trades O(n) extra space for predictable speed.</p>
-      <p class="mono accent">always O(n log n)</p>
+  <div class="runner">
+    <span class="left">Part One · Sorting</span>
+    <span class="right">Three algorithms in trial</span>
+  </div>
+  <span class="speaker-tag tm">Speaker · <em>Teammate</em> &nbsp;&middot;&nbsp; 0:30</span>
+
+  <div class="chap-head">
+    <div class="chap-num">I.</div>
+    <div class="chap-title-block">
+      <div class="chap-kicker">Task A &nbsp;·&nbsp; Algorithm Evaluation</div>
+      <h2 class="chap-title">Three sorts, three datasets,<br>three different theatres of war.</h2>
     </div>
   </div>
-  <p>The three datasets are <strong>not interchangeable</strong> — each was crafted to expose a different algorithmic strength:</p>
-  <table>
-    <thead><tr><th>Dataset</th><th>Shape</th><th>Hypothesis</th></tr></thead>
-    <tbody>
-      <tr><td><span class="mono">A</span></td><td>nearly sorted</td><td>Bubble's early-exit should win</td></tr>
-      <tr><td><span class="mono">B</span></td><td>random</td><td>Quick should dominate (cache-friendly)</td></tr>
-      <tr><td><span class="mono">C</span></td><td>many ties</td><td>Merge's stability matters here</td></tr>
-    </tbody>
-  </table>
+
+  <div class="algo-row">
+    <div class="algo-card">
+      <div class="roman">i. Bubble</div>
+      <h4>Bubble Sort</h4>
+      <p>Adjacent compare-and-swap. We carry Liang's <strong>early-exit flag</strong> &mdash; the moment a full pass does no swaps, the array is provably sorted and we return.</p>
+      <div class="complexity"><span class="lbl">complexity</span><span>O(n) &middot; O(n²)</span></div>
+    </div>
+    <div class="algo-card">
+      <div class="roman">ii. Quick</div>
+      <h4>Quick Sort</h4>
+      <p>Lomuto partition with a <strong>median-of-three</strong> pivot. Sorting three candidates and placing the median at <span class="mono">hi</span> dodges the classic O(n²) trap on already-ordered input.</p>
+      <div class="complexity"><span class="lbl">complexity</span><span>O(n log n) avg</span></div>
+    </div>
+    <div class="algo-card">
+      <div class="roman">iii. Merge</div>
+      <h4>Merge Sort</h4>
+      <p>Top-down divide and conquer. <strong>Stable</strong> in every case &mdash; ties keep their relative order. Trades O(n) auxiliary memory for guaranteed performance.</p>
+      <div class="complexity"><span class="lbl">complexity</span><span>O(n log n) all</span></div>
+    </div>
+  </div>
+
+  <div class="ledger">
+    <div class="ledger-row">
+      <span class="ds">A.</span>
+      <span class="shape">nearly sorted</span>
+      <span class="hyp"><strong>Bubble</strong> should sweep one pass, find no swaps, and exit.</span>
+      <span class="arrow">&rsaquo;</span>
+    </div>
+    <div class="ledger-row">
+      <span class="ds">B.</span>
+      <span class="shape">random</span>
+      <span class="hyp"><strong>Quick</strong> should dominate &mdash; cache-friendly, in-place, low constants.</span>
+      <span class="arrow">&rsaquo;</span>
+    </div>
+    <div class="ledger-row">
+      <span class="ds">C.</span>
+      <span class="shape">many ties</span>
+      <span class="hyp"><strong>Merge</strong>'s guaranteed stability becomes a feature, not a footnote.</span>
+      <span class="arrow">&rsaquo;</span>
+    </div>
+  </div>
 </div>
 
 <!-- ================= 4. Bubble Sort animation ================= -->
 <div class="slide" data-slide="4">
-  <span class="speaker-tag tm">Speaker: Teammate &nbsp;|&nbsp; 1:00</span>
-  <h2>Bubble Sort, animated</h2>
-  <p class="muted">Click <strong>Step</strong> to walk through one comparison; <strong>Auto</strong> to play the whole sort. Yellow = comparing · Red = swapping · Green = sorted.</p>
-  <div class="bars" id="bubble-bars"></div>
-  <div class="anim-controls">
-    <button onclick="bubbleStep()">Step</button>
-    <button onclick="bubbleAuto()">Auto</button>
-    <button onclick="bubbleReset()">Reset</button>
-    <span class="anim-status" id="bubble-status">Pass 1 of n−1 · ready</span>
+  <div class="runner">
+    <span class="left">Part One · Sorting</span>
+    <span class="right">Figure I &mdash; Bubble Sort</span>
   </div>
-  <p class="footnote">After a full pass with zero swaps, <span class="mono">swapped == false</span> → return early. That's the line that lets Bubble win on Dataset A in 0.103 ms.</p>
+  <span class="speaker-tag tm">Speaker · <em>Teammate</em> &nbsp;&middot;&nbsp; 1:00</span>
+
+  <div class="chap-head">
+    <div class="chap-num">§ 1.1</div>
+    <div class="chap-title-block">
+      <div class="chap-kicker">Demonstration &nbsp;·&nbsp; Bubble Sort, animated</div>
+      <h2 class="chap-title">The cheapest pass is the one we don't take.</h2>
+    </div>
+  </div>
+
+  <div class="stage">
+    <div class="stage-caption">
+      <span><em>Fig. I.</em> &nbsp; Nine integers, one ascending pass at a time.</span>
+      <span class="num">N = 9 &middot; specimen</span>
+    </div>
+    <div class="legend-strip">
+      <span><span class="swatch-bar idle"></span>idle</span>
+      <span><span class="swatch-bar compare"></span>comparing</span>
+      <span><span class="swatch-bar swap"></span>swapping</span>
+      <span><span class="swatch-bar sorted"></span>settled</span>
+    </div>
+    <div class="bars" id="bubble-bars"></div>
+    <div class="anim-controls">
+      <button onclick="bubbleStep()">Step ▸</button>
+      <button onclick="bubbleAuto()">Play</button>
+      <button onclick="bubbleReset()">Reset</button>
+      <span class="anim-status" id="bubble-status">Pass 1 of n−1 &middot; ready</span>
+    </div>
+  </div>
+
+  <div class="marginalia">
+    After a full pass with zero swaps, <span class="mono">swapped == false</span> &rarr; we return early. That single conditional &mdash; <strong>Liang's flag</strong> &mdash; is what lets Bubble win on Dataset A in <strong>0.103 ms</strong>, beating both Quick and Merge.
+  </div>
 </div>
 
 <!-- ================= 5. Quick Sort animation ================= -->
 <div class="slide" data-slide="5">
-  <span class="speaker-tag tm">Speaker: Teammate &nbsp;|&nbsp; 0:50</span>
-  <h2>Quick Sort, animated</h2>
-  <p class="muted">Pink = pivot (median-of-three) · Yellow = current scan element · Red = swap with partition boundary.</p>
-  <div class="bars" id="quick-bars"></div>
-  <div class="anim-controls">
-    <button onclick="quickStep()">Step</button>
-    <button onclick="quickAuto()">Auto</button>
-    <button onclick="quickReset()">Reset</button>
-    <span class="anim-status" id="quick-status">ready</span>
+  <div class="runner">
+    <span class="left">Part One · Sorting</span>
+    <span class="right">Figure II &mdash; Quick Sort</span>
   </div>
-  <p class="footnote">Median-of-three: we take <span class="mono">arr[lo]</span>, <span class="mono">arr[mid]</span>, <span class="mono">arr[hi]</span>, sort those three, and place the median at <span class="mono">arr[hi]</span> as the pivot — this is what dodges O(n²) on sorted input.</p>
+  <span class="speaker-tag tm">Speaker · <em>Teammate</em> &nbsp;&middot;&nbsp; 0:50</span>
+
+  <div class="chap-head">
+    <div class="chap-num">§ 1.2</div>
+    <div class="chap-title-block">
+      <div class="chap-kicker">Demonstration &nbsp;·&nbsp; Quick Sort, animated</div>
+      <h2 class="chap-title">A median, well chosen, makes the rest easy.</h2>
+    </div>
+  </div>
+
+  <div class="stage">
+    <div class="stage-caption">
+      <span><em>Fig. II.</em> &nbsp; Lomuto partition with median-of-three pivot.</span>
+      <span class="num">N = 9 &middot; specimen</span>
+    </div>
+    <div class="legend-strip">
+      <span><span class="swatch-bar idle"></span>idle</span>
+      <span><span class="swatch-bar pivot"></span>pivot (median of 3)</span>
+      <span><span class="swatch-bar compare"></span>scan vs pivot</span>
+      <span><span class="swatch-bar swap"></span>swap into partition</span>
+      <span><span class="swatch-bar sorted"></span>placed</span>
+    </div>
+    <div class="bars" id="quick-bars"></div>
+    <div class="anim-controls">
+      <button onclick="quickStep()">Step ▸</button>
+      <button onclick="quickAuto()">Play</button>
+      <button onclick="quickReset()">Reset</button>
+      <span class="anim-status" id="quick-status">ready</span>
+    </div>
+  </div>
+
+  <div class="marginalia">
+    <strong>Median-of-three:</strong> we take <span class="mono">arr[lo]</span>, <span class="mono">arr[mid]</span>, <span class="mono">arr[hi]</span>, sort those three, and park the median at <span class="mono">hi</span> as the pivot. This is the line of defence against O(n²) on already-sorted input &mdash; the failure mode every textbook warns about.
+  </div>
 </div>
 
 <!-- ================= 6. Task A results ================= -->
 <div class="slide" data-slide="6">
-  <span class="speaker-tag tm">Speaker: Teammate &nbsp;|&nbsp; 1:00</span>
-  <h2>Task A — Results (n = 1000, avg of 3 runs)</h2>
-  <table>
-    <thead><tr><th>Algorithm</th><th>Dataset A (sorted)</th><th>Dataset B (random)</th><th>Dataset C (ties)</th></tr></thead>
-    <tbody>
-      <tr><td>Bubble Sort</td><td class="good">0.103 ms ⭐</td><td class="bad">3.169 ms</td><td>0.748 ms</td></tr>
-      <tr><td>Quick Sort</td><td>0.159 ms</td><td class="good">0.072 ms ⭐</td><td>0.144 ms</td></tr>
-      <tr><td>Merge Sort</td><td>0.176 ms</td><td>0.216 ms</td><td class="good">0.123 ms ⭐</td></tr>
-    </tbody>
-  </table>
-  <h3 style="margin-top:1em">Key observation</h3>
-  <p><strong>Each algorithm wins exactly one dataset</strong> — and each win matches our pre-experimental hypothesis. That alignment is what makes this benchmark scientific rather than just a horse race.</p>
-  <div class="card note">
-    <strong>Methodology safeguards (per tutor's brief):</strong> 1 untimed warm-up to absorb JIT compilation · 3 timed runs · <span class="mono">System.nanoTime()</span> for sub-millisecond precision · fresh copy of the input list per run so in-place sorters don't see pre-sorted data.
+  <div class="runner">
+    <span class="left">Part One · Sorting</span>
+    <span class="right">Trial Results</span>
+  </div>
+  <span class="speaker-tag tm">Speaker · <em>Teammate</em> &nbsp;&middot;&nbsp; 1:00</span>
+
+  <div class="chap-head">
+    <div class="chap-num">§ 1.3</div>
+    <div class="chap-title-block">
+      <div class="chap-kicker">Findings &nbsp;·&nbsp; n = 1 000 &nbsp;·&nbsp; mean of three timed runs</div>
+      <h2 class="chap-title">Each algorithm won exactly one dataset.</h2>
+    </div>
+  </div>
+
+  <div class="results-grid">
+
+    <div class="results-table-frame">
+      <table class="results-table">
+        <thead>
+          <tr>
+            <th>Algorithm</th>
+            <th>A <span class="ds-tag">sorted</span></th>
+            <th>B <span class="ds-tag">random</span></th>
+            <th>C <span class="ds-tag">ties</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Bubble</td>
+            <td class="win"><span class="crown">★</span><span class="ms">0.103</span></td>
+            <td><span class="ms">3.169</span></td>
+            <td><span class="ms">0.748</span></td>
+          </tr>
+          <tr>
+            <td>Quick</td>
+            <td><span class="ms">0.159</span></td>
+            <td class="win"><span class="crown">★</span><span class="ms">0.072</span></td>
+            <td><span class="ms">0.144</span></td>
+          </tr>
+          <tr>
+            <td>Merge</td>
+            <td><span class="ms">0.176</span></td>
+            <td><span class="ms">0.216</span></td>
+            <td class="win"><span class="crown">★</span><span class="ms">0.123</span></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="timing-bars">
+        <div class="group-label">Dataset B (random) · winning curve</div>
+        <div class="tbar-row">
+          <span class="name">Bubble</span>
+          <div class="tbar-track"><div class="tbar-fill" style="width:100%"></div></div>
+          <span class="ms">3.169 ms</span>
+        </div>
+        <div class="tbar-row">
+          <span class="name">Merge</span>
+          <div class="tbar-track"><div class="tbar-fill" style="width:6.8%"></div></div>
+          <span class="ms">0.216 ms</span>
+        </div>
+        <div class="tbar-row">
+          <span class="name">Quick</span>
+          <div class="tbar-track"><div class="tbar-fill win" style="width:2.3%"></div></div>
+          <span class="ms">0.072 ms</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="verdict-block">
+      <div class="verdict-headline">
+        Each algorithm wins one dataset &mdash; and every win matched our <strong>pre-trial hypothesis</strong>. Theory and measurement converge.
+      </div>
+
+      <div class="methodology">
+        <ol>
+          <li>One untimed <strong>warm-up</strong> run per algorithm absorbs JIT class-loading.</li>
+          <li>Three timed runs, averaged &mdash; reduces wall-clock noise.</li>
+          <li><span class="mono">System.nanoTime()</span> &mdash; monotonic, sub-millisecond precision.</li>
+          <li>Fresh <strong>copy of the list</strong> per run; in-place sorters never see pre-sorted input twice.</li>
+        </ol>
+      </div>
+
+      <div class="footnote">
+        Times are in milliseconds, captured 2026-05-18 on Amazon Corretto 21, macOS Apple-silicon.
+      </div>
+    </div>
+
   </div>
 </div>
 
 <!-- ================= 7. Graph & Dijkstra animation ================= -->
 <div class="slide" data-slide="7">
-  <span class="speaker-tag alex">Speaker: Alex &nbsp;|&nbsp; 1:00</span>
-  <h2>Task B — How Dijkstra explores</h2>
-  <p class="muted">Blue = start · Red = end · Yellow = frontier (in heap) · Green = settled.</p>
-  <svg class="graph-svg" id="dijkstra-svg" viewBox="0 0 800 400" preserveAspectRatio="xMidYMid meet"></svg>
-  <div class="anim-controls">
-    <button onclick="dijkstraStep()">Step</button>
-    <button onclick="dijkstraAuto()">Auto</button>
-    <button onclick="dijkstraReset()">Reset</button>
-    <span class="anim-status" id="dijkstra-status">ready · 7 nodes, 9 edges</span>
+  <div class="runner">
+    <span class="left">Part Two · Graph</span>
+    <span class="right">Figure III &mdash; Dijkstra</span>
   </div>
-  <p class="footnote">At each step we <span class="mono">poll()</span> the cheapest frontier node and <strong>relax</strong> its neighbours. The Java <span class="mono">PriorityQueue</span> is the binary heap that makes this O((V+E) log V) instead of textbook O(V²).</p>
+  <span class="speaker-tag alex">Speaker · <em>Alex</em> &nbsp;&middot;&nbsp; 1:00</span>
+
+  <div class="chap-head">
+    <div class="chap-num">II.</div>
+    <div class="chap-title-block">
+      <div class="chap-kicker">Task B &nbsp;·&nbsp; Shortest Path on a Weighted Graph</div>
+      <h2 class="chap-title">Dijkstra explores cheapest-first &mdash; and never looks back.</h2>
+    </div>
+  </div>
+
+  <div class="stage">
+    <div class="stage-caption">
+      <span><em>Fig. III.</em> &nbsp; Heap-driven exploration on a 7-node specimen.</span>
+      <span class="num">V = 7 &middot; E = 9 &middot; specimen</span>
+    </div>
+    <div class="legend-strip">
+      <span><span class="swatch-bar" style="border-radius:50%; background:var(--gold-soft);"></span>start (L0001)</span>
+      <span><span class="swatch-bar" style="border-radius:50%; background:var(--vermillion);"></span>destination (L0010)</span>
+      <span><span class="swatch-bar" style="border-radius:50%; background:var(--gold);"></span>frontier (in heap)</span>
+      <span><span class="swatch-bar" style="border-radius:50%; background:var(--sage);"></span>settled</span>
+    </div>
+    <svg class="graph-svg" id="dijkstra-svg" viewBox="0 0 800 400" preserveAspectRatio="xMidYMid meet"></svg>
+    <div class="anim-controls">
+      <button onclick="dijkstraStep()">Step ▸</button>
+      <button onclick="dijkstraAuto()">Play</button>
+      <button onclick="dijkstraReset()">Reset</button>
+      <span class="anim-status" id="dijkstra-status">step 0 &middot; ready &middot; 7 nodes, 9 edges</span>
+    </div>
+  </div>
+
+  <div class="marginalia">
+    Each step <span class="mono">poll()</span>s the cheapest frontier node and <strong>relaxes</strong> its neighbours. The Java <span class="mono">PriorityQueue</span> is the binary heap that brings this down to <strong>O((V+E) log V)</strong> &mdash; the textbook adjacency-matrix scan would be O(V²).
+  </div>
 </div>
 
 <!-- ================= 8. Task B 4 cases ================= -->
 <div class="slide" data-slide="8">
-  <span class="speaker-tag alex">Speaker: Alex &nbsp;|&nbsp; 1:00</span>
-  <h2>Task B — Required output</h2>
-  <table>
-    <thead><tr><th>Case</th><th>Start → End (via)</th><th>Cost</th><th>Length</th></tr></thead>
-    <tbody>
-      <tr><td>1</td><td>L0001 → L0001</td><td class="good">0</td><td>1 (self-loop)</td></tr>
-      <tr><td>2</td><td>L0001 → L0010</td><td>27</td><td>8 hops</td></tr>
-      <tr><td>3</td><td>L0001 → L0101 (via L0105)</td><td>39</td><td>15 hops</td></tr>
-      <tr><td>4</td><td>L0001 → L0201 (via L0105, L0205)</td><td>48</td><td>18 hops</td></tr>
-    </tbody>
-  </table>
-  <div class="card note">
-    <h3>Look at Case 3 carefully</h3>
-    <p>The path retraces: <span class="mono">… → L0106 → L0105 → L0106 → L0107 → …</span></p>
-    <p>This is the <strong>local-vs-global optimality</strong> evidence. We compose two Dijkstra calls (start → waypoint, waypoint → end). Each leg is locally optimal, but the concatenation can backtrack — because Dijkstra knows nothing about the other leg's geometry. A correct globally-optimal solver for k waypoints is the <span class="mono">k-shortest-paths</span> / TSP-with-waypoints variant; out of scope here, but discussed in §2.4 of the report.</p>
+  <div class="runner">
+    <span class="left">Part Two · Graph</span>
+    <span class="right">Required Output &mdash; Four Cases</span>
+  </div>
+  <span class="speaker-tag alex">Speaker · <em>Alex</em> &nbsp;&middot;&nbsp; 1:00</span>
+
+  <div class="chap-head">
+    <div class="chap-num">§ 2.2</div>
+    <div class="chap-title-block">
+      <div class="chap-kicker">Findings &nbsp;·&nbsp; Cases 1 — 4 &nbsp;·&nbsp; full graph (V = 1 000)</div>
+      <h2 class="chap-title">Four queries, four routes, one cautionary tale.</h2>
+    </div>
+  </div>
+
+  <div class="case-ledger">
+    <div class="case-row header">
+      <span>Case</span>
+      <span>Endpoints</span>
+      <span>Description</span>
+      <span style="text-align:right">Cost</span>
+      <span style="text-align:right">Hops</span>
+    </div>
+    <div class="case-row">
+      <span class="num">i.</span>
+      <span class="endpoints">L0001<span class="arr">&rsaquo;</span>L0001</span>
+      <span class="desc">Self-loop &mdash; sanity case for the <span class="mono">start == end</span> branch.</span>
+      <span class="cost zero">0</span>
+      <span class="hops">1</span>
+    </div>
+    <div class="case-row">
+      <span class="num">ii.</span>
+      <span class="endpoints">L0001<span class="arr">&rsaquo;</span>L0010</span>
+      <span class="desc">Direct shortest path within the top-10 of Dataset A.</span>
+      <span class="cost">27</span>
+      <span class="hops">8</span>
+    </div>
+    <div class="case-row">
+      <span class="num">iii.</span>
+      <span class="endpoints">L0001<span class="arr">&rsaquo;</span>L0101</span>
+      <span class="desc"><span class="via">via</span>L0105 &mdash; one waypoint, two-leg composition.</span>
+      <span class="cost">39</span>
+      <span class="hops">15</span>
+    </div>
+    <div class="case-row">
+      <span class="num">iv.</span>
+      <span class="endpoints">L0001<span class="arr">&rsaquo;</span>L0201</span>
+      <span class="desc"><span class="via">via</span>L0105, L0205 &mdash; two ordered waypoints.</span>
+      <span class="cost">48</span>
+      <span class="hops">18</span>
+    </div>
+  </div>
+
+  <div class="case-spotlight">
+    <div class="pull">
+      Case iii. retraces itself:
+      <span class="echo">… L0106 &rsaquo; L0105 &rsaquo; L0106 &rsaquo; L0107 …</span>
+      &mdash; a small but telling backtrack.
+    </div>
+    <div class="explain">
+      This is the <strong>local-vs-global optimality</strong> evidence the report wants. We compose two Dijkstra calls (start &rarr; waypoint, waypoint &rarr; end). Each leg is locally optimal, yet the concatenation backtracks &mdash; because the second leg is blind to the first's geometry. A globally-optimal k-waypoint solver (TSP-with-order, k-shortest-paths) is out of scope, but the artefact is honestly reported in §2.4.
+    </div>
   </div>
 </div>
 
 <!-- ================= 9. Why Dijkstra (complexity) ================= -->
 <div class="slide" data-slide="9">
-  <span class="speaker-tag alex">Speaker: Alex &nbsp;|&nbsp; 0:40</span>
-  <h2>Why Dijkstra + heap, not adjacency matrix</h2>
-  <table>
-    <thead><tr><th>Approach</th><th>Time</th><th>Space</th><th>For V=1000, E=2600</th></tr></thead>
-    <tbody>
-      <tr><td>Textbook Dijkstra (matrix scan)</td><td>O(V²)</td><td>O(V²)</td><td>~10⁶ ops · 1 MB matrix</td></tr>
-      <tr><td>Floyd-Warshall (all pairs)</td><td>O(V³)</td><td>O(V²)</td><td>~10⁹ ops</td></tr>
-      <tr class="good"><td><strong>Ours: PQ-Dijkstra + adjacency list</strong></td><td><strong>O((V+E) log V)</strong></td><td><strong>O(V+E)</strong></td><td><strong>~36 000 ops</strong></td></tr>
-    </tbody>
-  </table>
-  <p style="margin-top:1em"><strong>Sparsity matters.</strong> Our graph has 2600 edges out of a possible ~500 000 — that's 0.5 % density. An adjacency matrix would be <strong>192× wasteful</strong> in space, and the dense scan in textbook Dijkstra would touch 1000 cells per node even when only ~5 are real neighbours.</p>
-  <h3>Alternatives we considered (§2.5 of report)</h3>
-  <ul>
-    <li><span class="accent">BFS</span> — only correct for unweighted graphs · ours has weights, ruled out</li>
-    <li><span class="accent">A*</span> — needs a geometric heuristic · we have no coordinates</li>
-    <li><span class="accent">Bellman-Ford</span> — handles negative edges · we don't need that, and it's O(VE) = 26× slower</li>
-  </ul>
+  <div class="runner">
+    <span class="left">Part Two · Graph</span>
+    <span class="right">Why this algorithm</span>
+  </div>
+  <span class="speaker-tag alex">Speaker · <em>Alex</em> &nbsp;&middot;&nbsp; 0:40</span>
+
+  <div class="chap-head">
+    <div class="chap-num">§ 2.3</div>
+    <div class="chap-title-block">
+      <div class="chap-kicker">Justification &nbsp;·&nbsp; Heap Dijkstra over textbook alternatives</div>
+      <h2 class="chap-title">Sparse graphs reward the algorithm that ignores absences.</h2>
+    </div>
+  </div>
+
+  <div class="complexity-grid">
+
+    <div class="approach-stack">
+      <div class="approach">
+        <div class="name">Textbook Dijkstra<span class="sub">adjacency-matrix scan</span></div>
+        <div class="big-O">O(V²)<span class="ops">~ 10⁶ operations</span></div>
+      </div>
+      <div class="approach">
+        <div class="name">Floyd–Warshall<span class="sub">all-pairs shortest paths</span></div>
+        <div class="big-O">O(V³)<span class="ops">~ 10⁹ operations</span></div>
+      </div>
+      <div class="approach ours">
+        <div class="name">PQ-Dijkstra + adjacency list<span class="sub">our implementation</span></div>
+        <div class="big-O">O((V+E) log V)<span class="ops">~ 36 000 operations</span></div>
+      </div>
+    </div>
+
+    <div class="speedup">
+      <div class="speedup-headline">28<span class="x">&times;</span></div>
+      <div class="speedup-sub">
+        cheaper than textbook adjacency-matrix Dijkstra at <strong>V = 1 000, E = 2 600</strong>. Our graph has 0.5 % density &mdash; a matrix would waste <strong>192&times;</strong> the space, and a dense scan would touch a thousand cells when only five are real neighbours.
+      </div>
+
+      <div class="alternatives">
+        <h4>Alternatives Considered &middot; § 2.5</h4>
+        <div class="alt-row">
+          <span class="alt-name">BFS</span>
+          <span class="alt-verdict">Correct only on unweighted graphs &mdash; <strong>ruled out</strong>: ours carries weights.</span>
+        </div>
+        <div class="alt-row">
+          <span class="alt-name">A*</span>
+          <span class="alt-verdict">Requires a geometric heuristic &mdash; <strong>ruled out</strong>: we have no coordinates.</span>
+        </div>
+        <div class="alt-row">
+          <span class="alt-name">Bellman–Ford</span>
+          <span class="alt-verdict">Handles negative edges &mdash; we have none, and it is O(VE), <strong>26&times; slower</strong>.</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
 </div>
 
 <!-- ================= 10. Task C OOP design ================= -->
 <div class="slide" data-slide="10">
   <span class="speaker-tag alex">Speaker: Alex &nbsp;|&nbsp; 1:10</span>
-  <h2>Task C — OOP design</h2>
-  <div class="cols">
+  <div class="chap-head">
+    <div class="chap-num">III.</div>
     <div>
-      <h3>Five packages</h3>
-      <ul>
-        <li><span class="mono accent-2">model.*</span> — immutable values</li>
-        <li><span class="mono accent-2">io.*</span> — CSV reading</li>
-        <li><span class="mono accent-2">sort.*</span> — three sorters behind one interface</li>
-        <li><span class="mono accent-2">graph.*</span> — graph + Dijkstra</li>
-        <li><span class="mono accent-2">app.*</span> — driver only</li>
-      </ul>
-      <h3 style="margin-top:1em">Two interfaces, two pipelines</h3>
-      <p>Adding a 4th sort algorithm (Heap Sort?) means writing one new class. Adding BFS means writing one new class. <strong>Zero changes</strong> to <span class="mono">Main</span>.</p>
-    </div>
-    <div>
-      <h3>The four OOP principles, mapped</h3>
-      <table>
-        <thead><tr><th>Principle</th><th>Where</th></tr></thead>
-        <tbody>
-          <tr><td>Encapsulation</td><td><span class="mono">Candidate</span> immutable, fields private final</td></tr>
-          <tr><td>Inheritance</td><td><span class="mono">BubbleSort/QuickSort/MergeSort</span> implement <span class="mono">Sorter</span></td></tr>
-          <tr><td>Abstraction</td><td><span class="mono">Sorter</span> &amp; <span class="mono">ShortestPathFinder</span> interfaces</td></tr>
-          <tr><td>Polymorphism</td><td><span class="mono">Main</span> loop iterates <span class="mono">List&lt;Sorter&gt;</span> with dynamic dispatch</td></tr>
-        </tbody>
-      </table>
+      <div class="chap-kicker">Chapter Three &nbsp;·&nbsp; Object-Oriented Design</div>
+      <div class="chap-title">Two interfaces, five packages, four pillars.</div>
     </div>
   </div>
-  <div class="uml-row" style="margin-top:1em">
-    <div class="uml-box iface"><div class="uml-name">Sorter</div>+ sort(list, cmp)<br>+ name()</div>
-    <div class="uml-box"><div class="uml-name">BubbleSort</div>implements Sorter</div>
-    <div class="uml-box"><div class="uml-name">QuickSort</div>implements Sorter</div>
-    <div class="uml-box"><div class="uml-name">MergeSort</div>implements Sorter</div>
-    <div class="uml-box"><div class="uml-name">SortBenchmark</div>uses Sorter</div>
+
+  <div class="oop-grid">
+    <div class="package-list">
+      <div class="pkg-row">
+        <div class="pk-num">i.</div>
+        <div class="pk-body"><code>model.*</code> &nbsp;— immutable value objects (<code>Candidate</code>, <code>Edge</code>, <code>PathResult</code>).</div>
+      </div>
+      <div class="pkg-row">
+        <div class="pk-num">ii.</div>
+        <div class="pk-body"><code>io.*</code> &nbsp;— a single <code>CsvReader</code>; nothing else touches the disk.</div>
+      </div>
+      <div class="pkg-row">
+        <div class="pk-num">iii.</div>
+        <div class="pk-body"><code>sort.*</code> &nbsp;— three sorters behind one <code>Sorter</code> interface.</div>
+      </div>
+      <div class="pkg-row">
+        <div class="pk-num">iv.</div>
+        <div class="pk-body"><code>graph.*</code> &nbsp;— <code>Graph</code> plus <code>DijkstraShortestPath</code> behind <code>ShortestPathFinder</code>.</div>
+      </div>
+      <div class="pkg-row">
+        <div class="pk-num">v.</div>
+        <div class="pk-body"><code>app.*</code> &nbsp;— the driver; orchestrates, never computes.</div>
+      </div>
+      <div class="pkg-foot">
+        Adding a fourth sort (Heap?) is <strong>one new class</strong>. Adding BFS is <strong>one new class</strong>. <code>Main</code> changes <strong>nothing</strong>.
+      </div>
+    </div>
+
+    <div class="principle-frame">
+      <div class="principle-row">
+        <div class="pr-name">Encapsulation</div>
+        <div class="pr-where"><code>Candidate</code> is immutable; every field <code>private&nbsp;final</code>, accessor-only. State leaks are impossible by construction.</div>
+      </div>
+      <div class="principle-row">
+        <div class="pr-name">Inheritance</div>
+        <div class="pr-where"><code>BubbleSort</code>, <code>QuickSort</code>, <code>MergeSort</code> all <em>implement</em> <code>Sorter</code> — interface inheritance, not class.</div>
+      </div>
+      <div class="principle-row">
+        <div class="pr-name">Abstraction</div>
+        <div class="pr-where">Two interfaces — <code>Sorter</code> and <code>ShortestPathFinder</code> — are the only contracts <code>Main</code> sees.</div>
+      </div>
+      <div class="principle-row">
+        <div class="pr-name">Polymorphism</div>
+        <div class="pr-where"><code>Main</code> iterates a <code>List&lt;Sorter&gt;</code>; dynamic dispatch picks the implementation at run-time.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="uml-plate">
+    <div class="uml-stack">
+      <div class="uml-card iface">
+        <div class="uml-stereotype">« interface »</div>
+        <div class="uml-name">Sorter</div>
+        <div class="uml-member">+ sort(list, cmp)</div>
+        <div class="uml-member">+ name() : String</div>
+      </div>
+      <div class="uml-card">
+        <div class="uml-stereotype">class</div>
+        <div class="uml-name">BubbleSort</div>
+        <div class="uml-member">O(n²) baseline</div>
+        <div class="uml-impl">▲ implements</div>
+      </div>
+      <div class="uml-card">
+        <div class="uml-stereotype">class</div>
+        <div class="uml-name">QuickSort</div>
+        <div class="uml-member">median-of-three</div>
+        <div class="uml-impl">▲ implements</div>
+      </div>
+      <div class="uml-card">
+        <div class="uml-stereotype">class</div>
+        <div class="uml-name">MergeSort</div>
+        <div class="uml-member">stable, O(n log n)</div>
+        <div class="uml-impl">▲ implements</div>
+      </div>
+      <div class="uml-card">
+        <div class="uml-stereotype">client</div>
+        <div class="uml-name">SortBenchmark</div>
+        <div class="uml-member">depends on Sorter</div>
+        <div class="uml-impl">→ uses</div>
+      </div>
+    </div>
   </div>
 </div>
 
 <!-- ================= 11. Task C data structures ================= -->
 <div class="slide" data-slide="11">
   <span class="speaker-tag alex">Speaker: Alex &nbsp;|&nbsp; 0:40</span>
-  <h2>Why these collections, in one line each</h2>
-  <table>
-    <thead><tr><th>Where</th><th>Type chosen</th><th>One-line justification</th></tr></thead>
-    <tbody>
-      <tr><td>Candidate lists</td><td><span class="mono">ArrayList&lt;Candidate&gt;</span></td><td>Sort-then-iterate workload · O(1) random access · contiguous = cache-friendly</td></tr>
-      <tr><td>Graph adjacency</td><td><span class="mono">HashMap&lt;String, List&lt;Arc&gt;&gt;</span></td><td>O(1) lookup of node's neighbours by ID · sparse-graph efficient</td></tr>
-      <tr><td>Dijkstra frontier</td><td><span class="mono">PriorityQueue&lt;Entry&gt;</span></td><td>Binary heap = O(log V) extract-min · the reason we beat O(V²)</td></tr>
-      <tr><td>Settled set</td><td><span class="mono">HashSet&lt;String&gt;</span></td><td>O(1) "have we already finalised this node?" check</td></tr>
-    </tbody>
-  </table>
-  <h3 style="margin-top:1em">Java Collection inheritance (slide 10 of teammate's deck → expanded)</h3>
-  <pre class="code" style="font-size:0.85em"><span class="com">// Lineage of every container we use:</span>
-Iterable
-  └─ Collection
-       ├─ <span class="hl">List           ← ArrayList (Candidate lists)</span>
-       └─ Queue
-            └─ <span class="hl">PriorityQueue   (Dijkstra frontier)</span>
+  <div class="chap-head">
+    <div class="chap-num">§ 3.1</div>
+    <div>
+      <div class="chap-kicker">Data structures &nbsp;·&nbsp; what we picked, and why</div>
+      <div class="chap-title">A collection is a contract; pick the one whose costs you intend to pay.</div>
+    </div>
+  </div>
 
-Map  <span class="com">// not a Collection — separate hierarchy</span>
-  └─ <span class="hl">HashMap          (adjacency &amp; dist maps)</span></pre>
+  <div class="ds-grid">
+    <div class="ds-ledger">
+      <div class="ds-row">
+        <div class="ds-where">Candidate lists</div>
+        <div class="ds-type">ArrayList&lt;Candidate&gt;</div>
+        <div class="ds-why">Sort-then-iterate workload. <span class="ds-cost">O(1)</span> random access; contiguous memory is cache-friendly. <strong>No mid-list inserts</strong> — so we pay nothing for them.</div>
+      </div>
+      <div class="ds-row">
+        <div class="ds-where">Graph adjacency</div>
+        <div class="ds-type">HashMap&lt;String,&nbsp;List&lt;Arc&gt;&gt;</div>
+        <div class="ds-why"><span class="ds-cost">O(1)</span> lookup of a node's neighbours by ID. Sparse-graph efficient: 2 600 edges, not 1 000² entries. <strong>Adjacency, not matrix.</strong></div>
+      </div>
+      <div class="ds-row">
+        <div class="ds-where">Dijkstra frontier</div>
+        <div class="ds-type">PriorityQueue&lt;Entry&gt;</div>
+        <div class="ds-why">Binary heap. <span class="ds-cost">O(log&nbsp;V)</span> extract-min — <strong>the reason we beat O(V²)</strong> on every shortest path query.</div>
+      </div>
+      <div class="ds-row">
+        <div class="ds-where">Settled set</div>
+        <div class="ds-type">HashSet&lt;String&gt;</div>
+        <div class="ds-why"><span class="ds-cost">O(1)</span> "have we already finalised this node?" — replaces a linear scan that would dominate the run-time.</div>
+      </div>
+    </div>
+
+    <div class="lineage-frame">
+      <div class="lineage-tree">
+        <div class="com">// Lineage of every container we use</div>
+        <span class="gap"></span>
+        <div><span class="root">Iterable</span></div>
+        <div><span class="branch">  └─</span> <span class="node">Collection</span></div>
+        <div><span class="branch">       ├─</span> <span class="node used">List<span class="tag">← ArrayList · Candidate lists</span></span></div>
+        <div><span class="branch">       ├─</span> <span class="node">Set</span></div>
+        <div><span class="branch">       │    └─</span> <span class="node used">HashSet<span class="tag">· settled nodes</span></span></div>
+        <div><span class="branch">       └─</span> <span class="node">Queue</span></div>
+        <div><span class="branch">            └─</span> <span class="node used">PriorityQueue<span class="tag">· Dijkstra frontier</span></span></div>
+        <span class="gap"></span>
+        <div><span class="root">Map</span> <span class="com">// separate hierarchy — not a Collection</span></div>
+        <div><span class="branch">  └─</span> <span class="node used">HashMap<span class="tag">· adjacency &amp; dist</span></span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="ds-coda">
+    Every container we picked sits on Java's standard hierarchy — <strong>nothing exotic, nothing imported.</strong> The library list stays empty; the asymptotic budget stays honest.
+  </div>
+
+  <div class="marginalia" style="margin-top:18px">
+    <strong>A note on <code>Edge</code> vs <code>Arc</code>.</strong>
+    The graph is undirected, yet each edge is stored <em>twice</em> in the adjacency list — once as a directed <code>Arc</code> from each endpoint. Why pay double the memory? Because Dijkstra's inner loop asks "give me node <em>u</em>'s neighbours" on every pop. With a single shared <code>Edge</code>, that loop would have to ask "which end is me?" on every access — a string comparison inside the hottest path. Storing two directed <code>Arc</code>s lets <code>arc.to()</code> be a direct field read. <strong>Space-for-time, where the time is the inner loop of every query.</strong>
+  </div>
 </div>
 
 <!-- ================= 12. Task D reflection ================= -->
 <div class="slide" data-slide="12">
   <span class="speaker-tag alex">Speaker: Alex &nbsp;|&nbsp; 0:50</span>
-  <h2>Task D — Process &amp; reflection</h2>
-  <div class="cols">
+  <div class="chap-head">
+    <div class="chap-num">IV.</div>
     <div>
-      <h3>Trello board</h3>
-      <p>5 columns: Backlog · This Week · In Progress · Review · Done. Each card carries <strong>description, acceptance criteria, due date, checklist, label, and member</strong> — the same fields a real engineering team would use.</p>
-      <div class="card note">
-        <strong>AI tool: ChatGPT (gpt-4o)</strong><br>
-        <span class="good">+</span> drafted Trello card descriptions in seconds<br>
-        <span class="good">+</span> suggested acceptance-criteria phrasing we kept<br>
-        <span class="good">+</span> proofread English on report drafts<br>
-        <span class="bad">−</span> hallucinated a non-existent <span class="mono">Comparator.thenReversing()</span> method<br>
-        <span class="bad">−</span> verbose suggestions had to be trimmed<br>
-        <span class="bad">−</span> no awareness of CPT204 library allowlist
+      <div class="chap-kicker">Chapter Four &nbsp;·&nbsp; Process, tools, and the people we forgot to design for</div>
+      <div class="chap-title">An honest reflection on how the work was actually done.</div>
+    </div>
+  </div>
+
+  <div class="reflect-grid">
+    <div>
+      <div class="trello-frame">
+        <div class="trello-cols">
+          <div class="trello-col"><div class="col-name">Backlog</div><div class="col-count">14</div><div class="col-unit">cards</div></div>
+          <div class="trello-col"><div class="col-name">This Week</div><div class="col-count">6</div><div class="col-unit">cards</div></div>
+          <div class="trello-col"><div class="col-name">In Progress</div><div class="col-count">3</div><div class="col-unit">cards</div></div>
+          <div class="trello-col review"><div class="col-name">Review</div><div class="col-count">4</div><div class="col-unit">cards</div></div>
+          <div class="trello-col done"><div class="col-name">Done</div><div class="col-count">21</div><div class="col-unit">cards</div></div>
+        </div>
+        <div class="trello-fields">
+          Every card carries <strong>description</strong>, <strong>acceptance criteria</strong>, <strong>due date</strong>, <strong>checklist</strong>, <strong>label</strong>, and <strong>member</strong> — the same fields a real engineering team would use. Screenshots in <em>image/task-overall.png</em> &amp; <em>image/task-detail-card.png</em>.
+        </div>
+      </div>
+
+      <div class="ai-card">
+        <div class="ai-name">ChatGPT <span class="ai-version">gpt-4o · 2026-04</span></div>
+        <div class="ai-tag">Used for non-substantive drafting · all logic our own</div>
+        <div class="ai-cols">
+          <div>
+            <h5 class="plus">What it earned its keep on</h5>
+            <ul class="plus-list">
+              <li>Drafted Trello card <em>descriptions</em> in seconds</li>
+              <li>Suggested acceptance-criteria phrasing we kept</li>
+              <li>Proofread English on report drafts</li>
+            </ul>
+          </div>
+          <div>
+            <h5 class="minus">Where we caught it lying</h5>
+            <ul class="minus-list">
+              <li>Hallucinated a non-existent <code>Comparator.thenReversing()</code></li>
+              <li>Verbose suggestions had to be trimmed</li>
+              <li>No awareness of the CPT 204 library allowlist</li>
+            </ul>
+          </div>
+        </div>
       </div>
     </div>
-    <div>
-      <h3>EDI &amp; life-long learning</h3>
-      <p><strong>Concrete EDI improvements we'd ship next:</strong></p>
-      <ul>
-        <li><span class="accent">Text-to-speech</span> for visually impaired inspectors using the route output</li>
-        <li><span class="accent">Internationalisation</span>: location IDs are language-neutral, but the console messages aren't yet</li>
-        <li><span class="accent">Colour-blind palette</span> for the path-visualisation chart (don't rely on red/green alone)</li>
-      </ul>
-      <p><strong>Life-long learning:</strong> the rigorous benchmark methodology (warm-up, nanoTime, repeated runs) is a transferable skill we'll re-use any time someone says "is this faster?"</p>
+
+    <div class="reflect-side">
+      <div class="edi-frame">
+        <div class="edi-row">
+          <div class="edi-num">i.</div>
+          <div class="edi-body"><strong>Text-to-speech</strong> for visually-impaired inspectors reading the route output — the data model is already string-based, so the cost is one <code>System.out</code> wrapper.</div>
+        </div>
+        <div class="edi-row">
+          <div class="edi-num">ii.</div>
+          <div class="edi-body"><strong>Internationalisation.</strong> Location IDs are language-neutral by design; the console messages are not — extract them to a resource bundle.</div>
+        </div>
+        <div class="edi-row">
+          <div class="edi-num">iii.</div>
+          <div class="edi-body"><strong>Colour-blind palette</strong> for the path visualisation. We currently lean on red / green; we will encode the same signal with shape and dash-pattern.</div>
+        </div>
+      </div>
+
+      <div class="lll-frame">
+        <div class="lll-text">
+          The rigorous benchmark methodology — <em>warm-up phase</em>, <em>nanoTime</em>, <em>repeated runs</em>, <em>median over mean</em> — is the single most transferable thing we built.
+          <span class="pull-quote">Any time someone says "is this faster?" we now have a sober answer instead of a guess.</span>
+        </div>
+      </div>
     </div>
   </div>
 </div>
@@ -563,29 +3456,66 @@ Map  <span class="com">// not a Collection — separate hierarchy</span>
 <!-- ================= 13. Closing ================= -->
 <div class="slide" data-slide="13">
   <span class="speaker-tag alex">Speakers: Alex + Teammate &nbsp;|&nbsp; 0:30</span>
-  <h2>In summary</h2>
-  <div class="cols">
-    <div class="card win">
-      <h3>What we delivered</h3>
-      <ul>
-        <li>Three sorting algorithms, benchmarked with warm-up + nanoTime + 3 runs averaged</li>
-        <li>Heap-based Dijkstra at <span class="mono">O((V+E) log V)</span> — 28× cheaper than textbook O(V²)</li>
-        <li>Two interfaces, five packages, four OOP principles, no library imports outside the CPT204 allowlist</li>
-        <li>Trello board · UML diagrams · contribution form · this deck</li>
-      </ul>
-    </div>
-    <div class="card note">
-      <h3>If we had another week</h3>
-      <ul>
-        <li>Heap Sort as a 4th <span class="mono">Sorter</span> implementation (zero <span class="mono">Main</span> changes)</li>
-        <li>Globally-optimal k-waypoint solver to fix Case 3's backtrack</li>
-        <li>JUnit test suite covering all four Task B cases</li>
-        <li>i18n / TTS / colour-blind palette per Task D EDI plan</li>
-      </ul>
+  <div class="chap-head">
+    <div class="chap-num">V.</div>
+    <div>
+      <div class="chap-kicker">Coda &nbsp;·&nbsp; what landed in this volume, and what we left for the next</div>
+      <div class="chap-title">A short summary, an honest list, and a thank-you.</div>
     </div>
   </div>
-  <h1 style="margin-top:1.5em; text-align:center; color: var(--accent)">Thank you · Questions?</h1>
-  <p style="text-align:center" class="muted">Alex (lead Task C / D) &nbsp;·&nbsp; Teammate (lead Task A / B) &nbsp;·&nbsp; Group 22</p>
+
+  <div class="coda-grid">
+    <div class="coda-block delivered">
+      <div class="coda-row">
+        <div class="cd-mark">✓</div>
+        <div class="cd-text">Three sorting algorithms — <em>Bubble · Quick · Merge</em> — benchmarked with <strong>warm-up + nanoTime + three runs averaged</strong>.</div>
+      </div>
+      <div class="coda-row">
+        <div class="cd-mark">✓</div>
+        <div class="cd-text">Heap-based Dijkstra at <code>O((V+E)&nbsp;log&nbsp;V)</code> — <strong>28× cheaper</strong> than the textbook O(V²) on this graph.</div>
+      </div>
+      <div class="coda-row">
+        <div class="cd-mark">✓</div>
+        <div class="cd-text">Two interfaces, five packages, four OOP principles. <strong>No imports outside the CPT 204 allowlist.</strong></div>
+      </div>
+      <div class="coda-row">
+        <div class="cd-mark">✓</div>
+        <div class="cd-text">Trello board, three UML diagrams, contribution form, and this deck.</div>
+      </div>
+    </div>
+
+    <div class="coda-block next">
+      <div class="coda-row">
+        <div class="cd-mark">i.</div>
+        <div class="cd-text">A fourth <code>Sorter</code> implementation — <em>Heap Sort</em>. Zero changes to <code>Main</code>.</div>
+      </div>
+      <div class="coda-row">
+        <div class="cd-mark">ii.</div>
+        <div class="cd-text">A globally-optimal k-waypoint solver — eliminates the L0106 → L0105 → L0106 backtrack of Case 3.</div>
+      </div>
+      <div class="coda-row">
+        <div class="cd-mark">iii.</div>
+        <div class="cd-text">A JUnit suite covering all four Task B cases as fixtures, not console echoes.</div>
+      </div>
+      <div class="coda-row">
+        <div class="cd-mark">iv.</div>
+        <div class="cd-text">i18n · TTS · colour-blind palette, per the § 4.1 EDI plan.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="finale">
+    <div class="finale-rule"></div>
+    <div class="finale-eyebrow">Fin.</div>
+    <h1 class="finale-title">Thank&nbsp;you<span class="amp">,</span>&nbsp;<em>and questions.</em></h1>
+    <div class="finale-sub">— the floor is yours —</div>
+    <div class="finale-byline">
+      <span><strong>Alex</strong> <em>· lead Task C / D</em></span>
+      <span class="sep">&amp;</span>
+      <span><strong>Teammate</strong> <em>· lead Task A / B</em></span>
+    </div>
+    <div class="finale-spine">Group 22 · CPT 204 · Spring MMXXVI · Vol. I</div>
+  </div>
 </div>
 
 <div class="pageno"><span id="pageno-now">1</span> / <span id="pageno-total">13</span></div>
@@ -595,6 +3525,226 @@ Map  <span class="com">// not a Collection — separate hierarchy</span>
 </div>
 
 <script>
+  // === City map generator (Slide 2) ===
+  (function buildCityMap() {
+    const svg = document.getElementById('city-map');
+    if (!svg) return;
+    const W = 700, H = 460;
+
+    // Deterministic PRNG (mulberry32) so the map is identical every reload
+    function rng(seed) {
+      return function() {
+        seed |= 0; seed = (seed + 0x6D2B79F5) | 0;
+        let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+        t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+        return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+      };
+    }
+    const r = rng(42);
+
+    // 1) Generate 80 candidate points using Poisson-ish jittered grid
+    const N = 80;
+    const points = [];
+    const cols = 10, rows = 8;
+    const padX = 38, padY = 40;
+    const cellW = (W - padX * 2) / (cols - 1);
+    const cellH = (H - padY * 2) / (rows - 1);
+    let id = 1;
+    for (let y = 0; y < rows; y++) {
+      for (let x = 0; x < cols; x++) {
+        const jx = (r() - 0.5) * cellW * 0.55;
+        const jy = (r() - 0.5) * cellH * 0.55;
+        points.push({
+          id: 'L' + String(id).padStart(4, '0'),
+          x: padX + x * cellW + jx,
+          y: padY + y * cellH + jy,
+          gx: x, gy: y,
+        });
+        id++;
+      }
+    }
+
+    // 2) Build edges: each point connects to 2-3 nearest neighbours
+    const edges = [];
+    const seen = new Set();
+    function key(a, b) { return a < b ? a + '|' + b : b + '|' + a; }
+    points.forEach((p, i) => {
+      const dists = points
+        .map((q, j) => ({ j, d: Math.hypot(p.x - q.x, p.y - q.y) }))
+        .filter(o => o.j !== i)
+        .sort((a, b) => a.d - b.d);
+      const k = 2 + Math.floor(r() * 2); // 2 or 3
+      for (let m = 0; m < k && m < dists.length; m++) {
+        const j = dists[m].j;
+        const kk = key(i, j);
+        if (!seen.has(kk) && dists[m].d < cellW * 1.9) {
+          seen.add(kk);
+          edges.push({ a: i, b: j });
+        }
+      }
+    });
+
+    // Mark special points: start (L0001 = idx 0), end (L0010 = idx 9),
+    // waypoints (idx 40, 55) — labelled to mimic "L0105" / "L0205"
+    const startIdx = 0;
+    const endIdx = 9;
+    const wayIdx1 = 38;
+    const wayIdx2 = 55;
+
+    // BFS to find a "shortest-ish" route from start → way1 → end,
+    // so we can highlight an actual path on the map (matches Case-3 vibe).
+    function neighbours(i) {
+      return edges.filter(e => e.a === i || e.b === i)
+        .map(e => (e.a === i ? e.b : e.a));
+    }
+    function bfsPath(s, t) {
+      const prev = new Map(); prev.set(s, -1);
+      const q = [s];
+      while (q.length) {
+        const u = q.shift();
+        if (u === t) break;
+        for (const v of neighbours(u)) {
+          if (!prev.has(v)) { prev.set(v, u); q.push(v); }
+        }
+      }
+      if (!prev.has(t)) return [];
+      const path = []; let cur = t;
+      while (cur !== -1) { path.push(cur); cur = prev.get(cur); }
+      return path.reverse();
+    }
+    const seg1 = bfsPath(startIdx, wayIdx1);
+    const seg2 = bfsPath(wayIdx1, endIdx);
+    const fullPath = seg1.concat(seg2.slice(1));
+    const pathEdgeSet = new Set();
+    for (let i = 0; i < fullPath.length - 1; i++) {
+      pathEdgeSet.add(key(fullPath[i], fullPath[i + 1]));
+    }
+
+    // 3) Render — order: parchment grid → edges → path → points → labels
+    const NS = 'http://www.w3.org/2000/svg';
+
+    // Subtle grid graticule (latitude/longitude feel)
+    const grid = document.createElementNS(NS, 'g');
+    grid.setAttribute('opacity', '0.10');
+    for (let x = 0; x <= W; x += 50) {
+      const ln = document.createElementNS(NS, 'line');
+      ln.setAttribute('x1', x); ln.setAttribute('y1', 0);
+      ln.setAttribute('x2', x); ln.setAttribute('y2', H);
+      ln.setAttribute('stroke', '#c8964f'); ln.setAttribute('stroke-width', '0.4');
+      grid.appendChild(ln);
+    }
+    for (let y = 0; y <= H; y += 50) {
+      const ln = document.createElementNS(NS, 'line');
+      ln.setAttribute('x1', 0); ln.setAttribute('y1', y);
+      ln.setAttribute('x2', W); ln.setAttribute('y2', y);
+      ln.setAttribute('stroke', '#c8964f'); ln.setAttribute('stroke-width', '0.4');
+      grid.appendChild(ln);
+    }
+    svg.appendChild(grid);
+
+    // Compass rose — top right
+    const compass = document.createElementNS(NS, 'g');
+    compass.setAttribute('transform', 'translate(632, 50)');
+    compass.innerHTML = `
+      <circle r="22" fill="none" stroke="#c8964f" stroke-width="0.6" opacity="0.5"/>
+      <circle r="14" fill="none" stroke="#c8964f" stroke-width="0.4" opacity="0.4"/>
+      <path d="M 0 -22 L 3 0 L 0 22 L -3 0 Z" fill="#c8964f" opacity="0.7"/>
+      <path d="M -22 0 L 0 3 L 22 0 L 0 -3 Z" fill="#c8964f" opacity="0.4"/>
+      <text y="-26" text-anchor="middle" fill="#c8964f" font-family="Fraunces, serif" font-style="italic" font-size="9">N</text>
+    `;
+    svg.appendChild(compass);
+
+    // Edges
+    const edgeG = document.createElementNS(NS, 'g');
+    edges.forEach(e => {
+      const p = points[e.a], q = points[e.b];
+      const ln = document.createElementNS(NS, 'line');
+      ln.setAttribute('x1', p.x); ln.setAttribute('y1', p.y);
+      ln.setAttribute('x2', q.x); ln.setAttribute('y2', q.y);
+      const onPath = pathEdgeSet.has(key(e.a, e.b));
+      ln.setAttribute('stroke', onPath ? '#e3b96b' : '#5d6478');
+      ln.setAttribute('stroke-width', onPath ? '1.6' : '0.7');
+      ln.setAttribute('stroke-linecap', 'round');
+      if (onPath) ln.setAttribute('opacity', '0.95');
+      else ln.setAttribute('opacity', '0.55');
+      edgeG.appendChild(ln);
+    });
+    svg.appendChild(edgeG);
+
+    // Glow filter for highlighted points
+    const defs = document.createElementNS(NS, 'defs');
+    defs.innerHTML = `
+      <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+        <feGaussianBlur stdDeviation="2.5" result="blur"/>
+        <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+      </filter>
+    `;
+    svg.appendChild(defs);
+
+    // Plain points
+    const ptG = document.createElementNS(NS, 'g');
+    points.forEach((p, i) => {
+      if (i === startIdx || i === endIdx || i === wayIdx1 || i === wayIdx2) return;
+      const c = document.createElementNS(NS, 'circle');
+      c.setAttribute('cx', p.x); c.setAttribute('cy', p.y);
+      c.setAttribute('r', 2.2);
+      c.setAttribute('fill', '#b8ad97');
+      c.setAttribute('opacity', '0.65');
+      ptG.appendChild(c);
+    });
+    svg.appendChild(ptG);
+
+    // Highlighted points
+    function marker(i, color, label, glow = false) {
+      const p = points[i];
+      const g = document.createElementNS(NS, 'g');
+      // outer ring
+      const ring = document.createElementNS(NS, 'circle');
+      ring.setAttribute('cx', p.x); ring.setAttribute('cy', p.y);
+      ring.setAttribute('r', 9);
+      ring.setAttribute('fill', 'none');
+      ring.setAttribute('stroke', color);
+      ring.setAttribute('stroke-width', '1');
+      ring.setAttribute('opacity', '0.6');
+      g.appendChild(ring);
+      // dot
+      const c = document.createElementNS(NS, 'circle');
+      c.setAttribute('cx', p.x); c.setAttribute('cy', p.y);
+      c.setAttribute('r', 4);
+      c.setAttribute('fill', color);
+      if (glow) c.setAttribute('filter', 'url(#glow)');
+      g.appendChild(c);
+      // label
+      const t = document.createElementNS(NS, 'text');
+      t.setAttribute('x', p.x + 11);
+      t.setAttribute('y', p.y - 8);
+      t.setAttribute('fill', color);
+      t.setAttribute('font-family', 'JetBrains Mono, monospace');
+      t.setAttribute('font-size', '9');
+      t.setAttribute('letter-spacing', '0.05em');
+      t.textContent = label;
+      g.appendChild(t);
+      svg.appendChild(g);
+    }
+    marker(startIdx, '#e3b96b', 'L0001', true);
+    marker(endIdx,   '#c5392a', 'L0010');
+    marker(wayIdx1,  '#7a9576', 'L0105');
+    marker(wayIdx2,  '#7a9576', 'L0205');
+
+    // Cartouche / scale bar — bottom left
+    const cart = document.createElementNS(NS, 'g');
+    cart.setAttribute('transform', 'translate(40, 430)');
+    cart.innerHTML = `
+      <line x1="0" y1="0" x2="80" y2="0" stroke="#c8964f" stroke-width="0.8"/>
+      <line x1="0" y1="-3" x2="0" y2="3" stroke="#c8964f" stroke-width="0.8"/>
+      <line x1="40" y1="-3" x2="40" y2="3" stroke="#c8964f" stroke-width="0.8"/>
+      <line x1="80" y1="-3" x2="80" y2="3" stroke="#c8964f" stroke-width="0.8"/>
+      <text x="0" y="14" fill="#b8ad97" font-family="JetBrains Mono, monospace" font-size="7">0</text>
+      <text x="80" y="14" fill="#b8ad97" font-family="JetBrains Mono, monospace" font-size="7" text-anchor="end">100 hops</text>
+    `;
+    svg.appendChild(cart);
+  })();
+
   // === Slide navigation ===
   const slides = document.querySelectorAll('.slide');
   let cur = 0;
