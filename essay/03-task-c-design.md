@@ -56,13 +56,42 @@ in sorted order — we look up by exact location id, an O(1)-average
 operation on `HashMap`. `ArrayList<Arc>` for each node's neighbour list
 keeps neighbour iteration contiguous in memory.
 
+#### Why a directed `Arc` is used to store an undirected graph
+
 The `Arc` inner class (the directed `(neighbour, weight)` pair stored
 per node) is deliberately separate from the `Edge` class (the
 undirected `(from, to, weight)` triple read from CSV). `Edge` reflects
 the file format; `Arc` reflects the in-memory layout. Each `Edge` is
-inserted as two `Arc`s (one in each direction) in `Graph.addEdge`,
+inserted as **two** `Arc`s (one in each direction) by `Graph.addEdge`,
 which is the conventional encoding of an undirected graph as a
 directed adjacency list.
+
+This double-storage looks redundant — the same edge appears twice — so
+it is worth justifying explicitly. We considered three encodings:
+
+1. **Single `List<Edge>`, no adjacency.** Most compact (each edge
+   stored once). But "give me the neighbours of node `u`" requires a
+   linear scan of all 2 600 edges, with both endpoints checked on each
+   row. Dijkstra's relaxation loop touches one node per pop and would
+   pay O(E) per pop, i.e. **O(V·E) ≈ 2.6 million comparisons per
+   query** for our graph.
+2. **Adjacency list keyed on `Edge` objects.** Each edge appears once
+   in two buckets (a shared reference). Saves half the storage but
+   forces the iteration code to ask, on every neighbour access,
+   "*which* end of this edge is me?", a string comparison plus a
+   ternary. Subtle, but it sits inside Dijkstra's hottest inner loop.
+3. **Adjacency list keyed on directed `Arc`s** (the option we chose).
+   Each edge is stored twice — once from each endpoint's point of
+   view — so `arc.to()` and `arc.weight()` are direct field reads with
+   no branching. Memory cost: 5 200 `Arc` objects instead of 2 600,
+   negligible at this scale.
+
+The trade-off is space-for-time, **and the time being saved is in
+Dijkstra's inner loop, which executes thousands of times per query**.
+The semantic distinction also pays a clarity dividend: `Edge` lives in
+`model.*` as a faithful transcription of the CSV row, while `Arc` is
+an implementation detail of `graph.Graph` that callers never see. The
+two abstractions can evolve independently.
 
 ### Priority queue — binary heap via `java.util.PriorityQueue`
 
