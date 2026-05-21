@@ -19,6 +19,7 @@ spacing 1.5, normal margins, ≤ 20 pages for Ch 1–4).
 - `06-appendix.md` — Chapter 6: console outputs, AI citations, extra
   diagrams not embedded in main text.
 - `07-contribution.md` — Chapter 7: contribution form (50/50).
+- `08-speaker-script.md` — companion script for `presentation.html` (Task E).
 
 ## Blocker conventions
 
