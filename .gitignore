@@ -9,3 +9,6 @@ out/
 .idea/
 .vscode/
 *.iml
+
+# Office lock / temp files
+~$*
