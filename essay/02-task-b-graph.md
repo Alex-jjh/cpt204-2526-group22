@@ -101,17 +101,57 @@ most O(V + E) entries because of the lazy-deletion strategy.
 
 ### Why this is faster than the textbook version
 
-Liang's introductory presentation (Ch 29.5) implements Dijkstra over an
-adjacency-matrix `WeightedGraph` and selects the next node by linear
-scan over an array of distances. That implementation runs in O(V²) per
-single-source query, regardless of how sparse the graph actually is —
-the linear scan dominates whenever E is much smaller than V². For the
-provided graph (V = 1000, E = 2600) the textbook version performs
-~10⁶ comparisons; our binary-heap version performs
-~(V + E) · log V ≈ 3600 · 10 ≈ 3.6 · 10⁴ heap operations. The
-algorithm is the same; the speed-up is purely a matter of the chosen
-auxiliary data structures (adjacency list + binary heap instead of
-adjacency matrix + linear scan).
+The Week 10 lecture distributed a `WeightedGraph.getShortestPath`
+implementation that uses two `ArrayList`-based structures inside the
+relaxation loop: an `ArrayList<Integer> T` to record settled vertices,
+and a linear scan over the parallel `cost[]` array to extract the next
+minimum. That code runs at **O(V³)** on this graph — not because the
+algorithm is wrong, but because the auxiliary data structures impose
+two unnecessary linear scans per iteration. The lecturer flagged this
+explicitly during the session ("*What if we don't use
+`ArrayList<Integer> T`? What if we use other data structures?*"), and
+this section answers that question concretely.
+
+There are **two distinct linear scans** in the textbook version, and
+each maps to a single data-structure swap in our implementation.
+
+| Role inside the relaxation loop | W10 textbook                          | Our implementation                     | Per-call cost     |
+|---|---|---|---|
+| Membership test ("is *v* already settled?")     | `ArrayList<Integer> T`, `T.contains()`         | `HashSet<String> settled`              | O(V) → **O(1)**  |
+| Extract-min ("cheapest unsettled *v*?")         | linear scan over `cost[]`                       | `java.util.PriorityQueue` (binary heap) | O(V) → **O(log V)** |
+
+Composing the two costs over V iterations of the outer `while`:
+
+- **W10 textbook:** outer loop V × (extract-min V × membership-test V) = **O(V³)** ≈ 10⁹ operations on the provided graph.
+- **Our version:** total heap operations bounded by O(V + E) (each vertex inserted at most once per relaxation that improves its distance), each costing O(log V), giving **O((V + E) · log V)** ≈ 3.6 × 10⁴ operations on the provided graph.
+
+That is roughly a **30 000× reduction in operation count** without any
+change to the algorithmic logic. The relaxation rule, the priority
+ordering, and the settled-vertex invariant are all unchanged — what
+changes is how the loop *finds* the next vertex and *checks* whether
+it has been settled.
+
+#### Why the two swaps must be made together
+
+Replacing only one of the `ArrayList` roles is not enough. If only the
+heap is added (extract-min becomes O(log V)) but `T.contains()` remains
+linear, the per-pop work is still O(V); the overall complexity stays at
+O(V²). Symmetrically, if only the `HashSet` is added (membership in
+O(1)) but the extract-min remains a linear scan over `cost[]`, the
+inner scan is still O(V) and the overall complexity is again O(V²).
+**The reduction to O((V + E) · log V) lives in the interaction between
+the two structures**, not in either change in isolation. This is also
+why the two-line code change is reported as a single optimisation in
+the slide deck (slide 9): they are conceptually one decision.
+
+A small implementation detail completes the picture. Our heap does not
+support O(log V) `decreaseKey`, so when relaxation improves a node's
+distance we push a fresh `(node, new_distance)` entry rather than
+updating the old one — the well-known **lazy-deletion** pattern. Stale
+entries are filtered on pop by the `settled.add(...)` check
+(`if (!settled.add(cur.node)) continue;`). The `HashSet` therefore
+serves a second purpose beyond fast membership: it makes lazy deletion
+trivial. This reuse is part of why the two swaps compose so cleanly.
 
 ## 2.4 Local vs Global Optimality
 

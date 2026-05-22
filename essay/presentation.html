@@ -1551,7 +1551,386 @@
   }
   .case-spotlight .explain strong { color: var(--gold-soft); font-weight: 600; }
 
-  /* === Slide 9: Complexity ledger =================================== */
+  /* === Slide 8: Thirty selected targets · Case composition ============== */
+  .targets-stage {
+    display: grid;
+    grid-template-columns: 1.05fr 1fr;
+    gap: 2.2vw;
+    flex: 1;
+    margin-top: 1em;
+    min-height: 0;
+  }
+  .targets-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 0;
+    border: 1px solid var(--rule-strong);
+    align-self: start;
+  }
+  .targets-col {
+    display: flex; flex-direction: column;
+    border-right: 1px dotted var(--rule);
+  }
+  .targets-col:last-child { border-right: none; }
+  .targets-col .col-head {
+    padding: 0.55em 0.85em 0.5em;
+    border-bottom: 1px solid var(--rule-strong);
+    background: rgba(200,150,79,0.05);
+  }
+  .targets-col .col-head .col-tag {
+    font-family: 'Inter Tight', sans-serif;
+    font-size: 0.52rem;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    color: var(--paper-mute);
+  }
+  .targets-col .col-head .col-name {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 0.92rem;
+    color: var(--paper);
+    margin-top: 0.08em;
+  }
+  .targets-col .col-head .col-shape {
+    font-family: 'Newsreader', serif;
+    font-size: 0.7rem;
+    font-style: italic;
+    color: var(--paper-mute);
+    margin-top: 0.18em;
+  }
+  .targets-col.col-A .col-head { border-left: 2px solid var(--gold); }
+  .targets-col.col-B .col-head { border-left: 2px solid var(--vermillion); }
+  .targets-col.col-C .col-head { border-left: 2px solid var(--sage); }
+  .targets-col .target-row {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: baseline;
+    padding: 0.32em 0.85em;
+    border-bottom: 1px dotted rgba(166,150,121,0.12);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.72rem;
+    color: var(--paper-dim);
+    transition: background 0.15s;
+  }
+  .targets-col .target-row:last-child { border-bottom: none; }
+  .targets-col .target-row .tid { color: var(--paper); letter-spacing: 0.02em; }
+  .targets-col .target-row .tscore {
+    color: var(--paper-mute);
+    font-size: 0.66rem;
+    font-feature-settings: "lnum", "tnum";
+  }
+  .targets-col .target-row.used {
+    background: rgba(200,150,79,0.07);
+    border-bottom-color: rgba(200,150,79,0.2);
+  }
+  .targets-col.col-A .target-row.used .tid { color: var(--gold); font-weight: 600; }
+  .targets-col.col-B .target-row.used .tid { color: var(--vermillion); font-weight: 600; }
+  .targets-col.col-C .target-row.used .tid { color: var(--sage); font-weight: 600; }
+  .targets-col .target-row.used .tscore { color: var(--paper-dim); }
+  .targets-col .target-row .role-mark {
+    margin-left: 0.5em;
+    font-family: 'Inter Tight', sans-serif;
+    font-size: 0.5rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--paper-mute);
+  }
+
+  .compose-panel {
+    display: flex; flex-direction: column;
+    min-height: 0;
+  }
+  .compose-panel .panel-head {
+    border-bottom: 1px solid var(--rule-strong);
+    padding-bottom: 0.5em;
+    margin-bottom: 0.7em;
+  }
+  .compose-panel .panel-head .ph-tag {
+    font-family: 'Inter Tight', sans-serif;
+    font-size: 0.55rem;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    color: var(--gold);
+  }
+  .compose-panel .panel-head .ph-title {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 1.1rem;
+    color: var(--paper);
+    margin-top: 0.15em;
+  }
+  .compose-list { display: flex; flex-direction: column; gap: 0.55em; }
+  .compose-card {
+    border-left: 1px solid var(--rule);
+    padding: 0.4em 0 0.4em 0.9em;
+    display: grid;
+    grid-template-columns: 32px 1fr auto;
+    gap: 0.7em;
+    align-items: baseline;
+  }
+  .compose-card .cnum {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 1.15rem;
+    color: var(--gold);
+    line-height: 1;
+  }
+  .compose-card .cbody {
+    display: flex; flex-direction: column;
+    gap: 0.18em;
+  }
+  .compose-card .cseq {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.78rem;
+    color: var(--paper);
+    letter-spacing: 0.01em;
+  }
+  .compose-card .cseq .id-A { color: var(--gold); font-weight: 600; }
+  .compose-card .cseq .id-B { color: var(--vermillion); font-weight: 600; }
+  .compose-card .cseq .id-C { color: var(--sage); font-weight: 600; }
+  .compose-card .cseq .arr { color: var(--paper-mute); margin: 0 0.35em; }
+  .compose-card .cseq .via-label {
+    font-family: 'Inter Tight', sans-serif;
+    font-size: 0.52rem;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--vermillion);
+    margin: 0 0.3em;
+  }
+  .compose-card .cdesc {
+    font-family: 'Newsreader', serif;
+    font-style: italic;
+    font-size: 0.78rem;
+    color: var(--paper-dim);
+    line-height: 1.4;
+  }
+  .compose-card .ccost {
+    font-family: 'Fraunces', serif;
+    font-size: 1.4rem;
+    color: var(--paper);
+    font-weight: 600;
+    text-align: right;
+    line-height: 1;
+    font-feature-settings: "lnum";
+  }
+  .compose-card .ccost.zero { color: var(--sage); }
+  .compose-card .ccost .ccost-unit {
+    display: block;
+    font-family: 'Inter Tight', sans-serif;
+    font-size: 0.5rem;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: var(--paper-mute);
+    font-weight: 400;
+    margin-top: 0.2em;
+  }
+  .compose-card.flagged { border-left-color: var(--vermillion); }
+  .compose-card.flagged .cnum { color: var(--vermillion); }
+
+  .compose-footnote {
+    margin-top: 0.85em;
+    padding-top: 0.55em;
+    border-top: 1px dotted var(--rule);
+    font-family: 'Newsreader', serif;
+    font-style: italic;
+    font-size: 0.78rem;
+    line-height: 1.5;
+    color: var(--paper-dim);
+  }
+  .compose-footnote .fn-tag {
+    display: inline-block;
+    font-family: 'Inter Tight', sans-serif;
+    font-style: normal;
+    font-size: 0.5rem;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: var(--vermillion);
+    margin-right: 0.55em;
+  }
+  .compose-footnote strong { color: var(--paper); font-style: normal; font-weight: 600; }
+  .compose-footnote .echo {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    background: rgba(197,57,42,0.12);
+    padding: 0.12em 0.4em;
+    color: var(--paper);
+    font-style: normal;
+    letter-spacing: 0.02em;
+  }
+
+  /* === Slide 9: The two swaps that fix W10 ============================== */
+  .swaps-stage {
+    display: grid;
+    grid-template-columns: 1.05fr 1.15fr;
+    gap: 2.4vw;
+    flex: 1;
+    margin-top: 1.1em;
+    min-height: 0;
+  }
+  .swap-codeplate {
+    border: 1px solid var(--rule);
+    background: linear-gradient(180deg, rgba(10,13,18,0.55), rgba(10,13,18,0.25));
+    padding: 1em 1.15em;
+    display: flex; flex-direction: column;
+    min-height: 0;
+  }
+  .swap-codeplate .plate-head {
+    display: flex; justify-content: space-between; align-items: baseline;
+    border-bottom: 1px dotted var(--rule);
+    padding-bottom: 0.45em; margin-bottom: 0.55em;
+  }
+  .swap-codeplate .plate-head .plate-title {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 0.96rem;
+    color: var(--paper);
+  }
+  .swap-codeplate .plate-head .plate-tag {
+    font-family: 'Inter Tight', sans-serif;
+    font-size: 0.55rem;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    color: var(--vermillion);
+  }
+  .swap-codeplate.ours .plate-head .plate-tag { color: var(--gold); }
+  .swap-codeplate pre {
+    margin: 0;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.66rem;
+    line-height: 1.55;
+    color: var(--paper-dim);
+    white-space: pre;
+    overflow: hidden;
+    flex: 1;
+  }
+  .swap-codeplate pre .kw { color: var(--gold-soft); }
+  .swap-codeplate pre .lit { color: var(--sage); }
+  .swap-codeplate pre .cm { color: var(--paper-mute); font-style: italic; }
+  .swap-codeplate pre .hot { color: var(--vermillion); font-weight: 600; }
+  .swap-codeplate.ours pre .hot { color: var(--gold); }
+  .swap-codeplate pre .anno {
+    color: var(--vermillion);
+    font-style: italic;
+  }
+  .swap-codeplate.ours pre .anno { color: var(--gold); }
+
+  .swap-coda {
+    margin-top: 0.7em;
+    padding-top: 0.55em;
+    border-top: 1px dotted var(--rule);
+    font-family: 'Newsreader', serif;
+    font-style: italic;
+    font-size: 0.82rem;
+    line-height: 1.5;
+    color: var(--paper-dim);
+  }
+  .swap-coda strong { color: var(--paper); font-style: normal; font-weight: 600; }
+  .swap-codeplate.ours .swap-coda strong { color: var(--gold); }
+
+  .swap-rhs {
+    display: flex; flex-direction: column;
+    gap: 1em;
+    min-height: 0;
+  }
+  .swap-table {
+    border: 1px solid var(--rule);
+    padding: 0.9em 1em;
+  }
+  .swap-table h4 {
+    font-family: 'Inter Tight', sans-serif;
+    font-size: 0.6rem;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin: 0 0 0.7em;
+  }
+  .swap-row {
+    display: grid;
+    grid-template-columns: 1fr 0.95fr 0.95fr;
+    gap: 0.6em;
+    padding: 0.45em 0;
+    font-family: 'Newsreader', serif;
+    font-size: 0.84rem;
+    line-height: 1.45;
+    border-bottom: 1px dotted var(--rule);
+    align-items: baseline;
+  }
+  .swap-row:last-child { border-bottom: none; }
+  .swap-row.head {
+    font-family: 'Inter Tight', sans-serif;
+    font-size: 0.55rem;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: var(--paper-mute);
+  }
+  .swap-row .role {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    color: var(--paper);
+  }
+  .swap-row .from { color: var(--paper-dim); }
+  .swap-row .to {
+    color: var(--paper);
+    font-weight: 600;
+  }
+  .swap-row .cost {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.74rem;
+  }
+  .swap-row .cost .bad { color: var(--vermillion); }
+  .swap-row .cost .good { color: var(--gold); }
+
+  .swap-formula {
+    border: 1px solid var(--gold);
+    background: linear-gradient(90deg, rgba(200,150,79,0.10), transparent 80%);
+    padding: 0.85em 1em;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 1em;
+    align-items: center;
+  }
+  .swap-formula .form-eq {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.95rem;
+    color: var(--gold);
+    letter-spacing: 0.02em;
+    white-space: nowrap;
+  }
+  .swap-formula .form-eq .arrow {
+    color: var(--paper-dim);
+    margin: 0 0.4em;
+  }
+  .swap-formula .form-note {
+    font-family: 'Newsreader', serif;
+    font-style: italic;
+    font-size: 0.82rem;
+    color: var(--paper-dim);
+    line-height: 1.45;
+  }
+  .swap-formula .form-note strong { color: var(--paper); font-style: normal; font-weight: 600; }
+
+  .swap-insight {
+    border-left: 2px solid var(--gold);
+    padding: 0.2em 0 0.2em 1em;
+    font-family: 'Newsreader', serif;
+    font-style: italic;
+    font-size: 0.92rem;
+    line-height: 1.5;
+    color: var(--paper);
+  }
+  .swap-insight .kicker {
+    display: block;
+    font-family: 'Inter Tight', sans-serif;
+    font-style: normal;
+    font-size: 0.55rem;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 0.35em;
+  }
+  .swap-insight strong { color: var(--gold); font-style: normal; font-weight: 600; }
+
+  /* === Slide 10 (was 9): Complexity ledger =========================== */
   .complexity-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -3095,8 +3474,137 @@
   </div>
 </div>
 
-<!-- ================= 8. Task B 4 cases ================= -->
+<!-- ================= 8. Thirty selected targets · Case composition ================= -->
 <div class="slide" data-slide="8">
+  <div class="runner">
+    <span class="left">Part Two · Graph</span>
+    <span class="right">Thirty selected targets &nbsp;·&nbsp; how the four cases compose</span>
+  </div>
+  <span class="speaker-tag alex">Speaker · <em>Alex</em> &nbsp;&middot;&nbsp; 0:45</span>
+
+  <div class="chap-head">
+    <div class="chap-num">§ 2.2a</div>
+    <div class="chap-title-block">
+      <div class="chap-kicker">Bridging Task A &rarr; Task B &nbsp;·&nbsp; 10 + 10 + 10 = 30 inspection points</div>
+      <h2 class="chap-title">From three top-tens to four routed queries.</h2>
+    </div>
+  </div>
+
+  <div class="targets-stage">
+    <div class="targets-grid">
+      <div class="targets-col col-A">
+        <div class="col-head">
+          <div class="col-tag">Top 10 &middot; from Dataset A</div>
+          <div class="col-name">Dataset A &mdash; sorted, no ties</div>
+          <div class="col-shape">scores 10 000 &rarr; 9 991, descending</div>
+        </div>
+        <div class="target-row used"><span class="tid">L0001</span><span class="tscore">10000</span></div>
+        <div class="target-row"><span class="tid">L0002</span><span class="tscore">9999</span></div>
+        <div class="target-row"><span class="tid">L0003</span><span class="tscore">9998</span></div>
+        <div class="target-row"><span class="tid">L0004</span><span class="tscore">9997</span></div>
+        <div class="target-row"><span class="tid">L0005</span><span class="tscore">9996</span></div>
+        <div class="target-row"><span class="tid">L0006</span><span class="tscore">9995</span></div>
+        <div class="target-row"><span class="tid">L0007</span><span class="tscore">9994</span></div>
+        <div class="target-row"><span class="tid">L0008</span><span class="tscore">9993</span></div>
+        <div class="target-row"><span class="tid">L0009</span><span class="tscore">9992</span></div>
+        <div class="target-row used"><span class="tid">L0010</span><span class="tscore">9991</span></div>
+      </div>
+      <div class="targets-col col-B">
+        <div class="col-head">
+          <div class="col-tag">Top 10 &middot; from Dataset B</div>
+          <div class="col-name">Dataset B &mdash; shuffled</div>
+          <div class="col-shape">average-case input shape</div>
+        </div>
+        <div class="target-row"><span class="tid">L0101</span><span class="tscore">10000</span></div>
+        <div class="target-row"><span class="tid">L0102</span><span class="tscore">9999</span></div>
+        <div class="target-row"><span class="tid">L0103</span><span class="tscore">9998</span></div>
+        <div class="target-row"><span class="tid">L0104</span><span class="tscore">9997</span></div>
+        <div class="target-row used"><span class="tid">L0105</span><span class="tscore">9996</span></div>
+        <div class="target-row"><span class="tid">L0106</span><span class="tscore">9995</span></div>
+        <div class="target-row"><span class="tid">L0107</span><span class="tscore">9994</span></div>
+        <div class="target-row"><span class="tid">L0108</span><span class="tscore">9993</span></div>
+        <div class="target-row"><span class="tid">L0109</span><span class="tscore">9992</span></div>
+        <div class="target-row"><span class="tid">L0110</span><span class="tscore">9991</span></div>
+      </div>
+      <div class="targets-col col-C">
+        <div class="col-head">
+          <div class="col-tag">Top 10 &middot; from Dataset C</div>
+          <div class="col-name">Dataset C &mdash; heavy ties</div>
+          <div class="col-shape">all scores = 5 000 (stable order)</div>
+        </div>
+        <div class="target-row used"><span class="tid">L0201</span><span class="tscore">5000</span></div>
+        <div class="target-row"><span class="tid">L0202</span><span class="tscore">5000</span></div>
+        <div class="target-row"><span class="tid">L0203</span><span class="tscore">5000</span></div>
+        <div class="target-row"><span class="tid">L0204</span><span class="tscore">5000</span></div>
+        <div class="target-row used"><span class="tid">L0205</span><span class="tscore">5000</span></div>
+        <div class="target-row"><span class="tid">L0206</span><span class="tscore">5000</span></div>
+        <div class="target-row"><span class="tid">L0207</span><span class="tscore">5000</span></div>
+        <div class="target-row"><span class="tid">L0208</span><span class="tscore">5000</span></div>
+        <div class="target-row"><span class="tid">L0209</span><span class="tscore">5000</span></div>
+        <div class="target-row"><span class="tid">L0210</span><span class="tscore">5000</span></div>
+      </div>
+    </div>
+
+    <div class="compose-panel">
+      <div class="panel-head">
+        <div class="ph-tag">Four required queries &middot; composed from the 30</div>
+        <div class="ph-title">Each case picks its endpoints &mdash; and waypoints &mdash; from the three top-tens.</div>
+      </div>
+
+      <div class="compose-list">
+        <div class="compose-card">
+          <span class="cnum">i.</span>
+          <div class="cbody">
+            <div class="cseq"><span class="id-A">L0001</span><span class="arr">&rsaquo;</span><span class="id-A">L0001</span></div>
+            <div class="cdesc">Self-loop &mdash; the <span style="font-family:'JetBrains Mono',monospace;font-style:normal;font-size:0.72rem;">start == end</span> sanity case.</div>
+          </div>
+          <div class="ccost zero">0<span class="ccost-unit">cost</span></div>
+        </div>
+
+        <div class="compose-card">
+          <span class="cnum">ii.</span>
+          <div class="cbody">
+            <div class="cseq"><span class="id-A">L0001</span><span class="arr">&rsaquo;</span><span class="id-A">L0010</span></div>
+            <div class="cdesc">Both endpoints from Dataset A &mdash; one Dijkstra invocation, 8 hops.</div>
+          </div>
+          <div class="ccost">27<span class="ccost-unit">cost</span></div>
+        </div>
+
+        <div class="compose-card flagged">
+          <span class="cnum">iii.</span>
+          <div class="cbody">
+            <div class="cseq">
+              <span class="id-A">L0001</span><span class="via-label">via</span><span class="id-B">L0105</span><span class="arr">&rsaquo;</span><span class="id-B">L0101</span>
+            </div>
+            <div class="cdesc">A &rarr; B with one waypoint &mdash; two stitched Dijkstras (start &rarr; via, via &rarr; end).</div>
+          </div>
+          <div class="ccost">39<span class="ccost-unit">cost</span></div>
+        </div>
+
+        <div class="compose-card">
+          <span class="cnum">iv.</span>
+          <div class="cbody">
+            <div class="cseq">
+              <span class="id-A">L0001</span><span class="via-label">via</span><span class="id-B">L0105</span><span class="arr">&rsaquo;</span><span class="id-C">L0205</span><span class="arr">&rsaquo;</span><span class="id-C">L0201</span>
+            </div>
+            <div class="cdesc">A &rarr; B &rarr; C with two ordered waypoints &mdash; three stitched legs, 18 hops.</div>
+          </div>
+          <div class="ccost">48<span class="ccost-unit">cost</span></div>
+        </div>
+      </div>
+
+      <div class="compose-footnote">
+        <span class="fn-tag">Caveat</span>
+        Stitching independent Dijkstras is <strong>locally optimal, not globally optimal</strong>. Case iii. demonstrates this concretely: the path retraces itself
+        <span class="echo">&hellip; L0107 &rsaquo; L0106 &rsaquo; L0105 &rsaquo; L0106 &rsaquo; L0107 &hellip;</span>
+        because the second leg is blind to the first leg's geometry. Closing this gap requires a k-waypoint solver (Bellman&ndash;Held&ndash;Karp, TSP-with-order) &mdash; out of scope here, but honestly reported in §2.4.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ================= 9. Task B 4 cases ================= -->
+<div class="slide" data-slide="9">
   <div class="runner">
     <span class="left">Part Two · Graph</span>
     <span class="right">Required Output &mdash; Four Cases</span>
@@ -3161,13 +3669,92 @@
   </div>
 </div>
 
-<!-- ================= 9. Why Dijkstra (complexity) ================= -->
-<div class="slide" data-slide="9">
+<!-- ================= 10. The two data-structure swaps (Week 10 follow-up) ================= -->
+<div class="slide" data-slide="10">
+  <div class="runner">
+    <span class="left">Part Two · Graph</span>
+    <span class="right">Week 10 follow-up &nbsp;·&nbsp; the two swaps that fix O(V³)</span>
+  </div>
+  <span class="speaker-tag alex">Speaker · <em>Alex</em> &nbsp;&middot;&nbsp; 0:35</span>
+
+  <div class="chap-head">
+    <div class="chap-num">§ 2.3a</div>
+    <div class="chap-title-block">
+      <div class="chap-kicker">Follow-up &nbsp;·&nbsp; the lecturer&rsquo;s open question, answered concretely</div>
+      <h2 class="chap-title">Two data structures, working as a pair, drop O(V³) to O((V+E)&nbsp;log&nbsp;V).</h2>
+    </div>
+  </div>
+
+  <div class="swaps-stage">
+
+    <!-- LEFT: Week 10 textbook code -->
+    <div class="swap-codeplate">
+      <div class="plate-head">
+        <span class="plate-title">Week 10 &mdash; <em>WeightedGraph.getShortestPath</em></span>
+        <span class="plate-tag">As given</span>
+      </div>
+<pre><span class="kw">while</span> (T.size() &lt; getSize()) {
+  <span class="cm">// scan all V to find smallest cost</span>
+  <span class="kw">for</span> (<span class="kw">int</span> i = 0; i &lt; getSize(); i++)
+    <span class="kw">if</span> (<span class="hot">!T.contains(i)</span> &amp;&amp; cost[i] &lt; min)  <span class="anno">&laquo; O(V) per check</span>
+      &hellip;
+  T.add(u);
+  <span class="kw">for</span> (Edge e : neighbors.get(u))
+    <span class="kw">if</span> (<span class="hot">!T.contains(e.v)</span> &amp;&amp; relax)         <span class="anno">&laquo; O(V) per check</span>
+      &hellip;
+}</pre>
+      <div class="swap-coda">
+        <strong>T is an <code>ArrayList&lt;Integer&gt;</code></strong>, so every <code>T.contains()</code> is a linear scan. The outer <code>while</code> runs V times; the inner scan runs V times; <code>contains</code> costs V. Three V&rsquo;s nested &mdash; <strong>O(V³)</strong>, ≈&nbsp;10⁹ ops on our graph.
+      </div>
+    </div>
+
+    <!-- RIGHT: our two swaps + formula + insight -->
+    <div class="swap-rhs">
+
+      <div class="swap-table">
+        <h4>The Two Swaps</h4>
+        <div class="swap-row head">
+          <span>Role in the loop</span>
+          <span>W10 textbook</span>
+          <span>Our implementation</span>
+        </div>
+        <div class="swap-row">
+          <span class="role">Membership test<br><span style="font-style:normal;font-size:0.7rem;color:var(--paper-mute);font-family:'Inter Tight'">&ldquo;is v already settled?&rdquo;</span></span>
+          <span class="from"><code>ArrayList&lt;Integer&gt; T</code><br><span class="cost"><span class="bad">O(V)</span> per check</span></span>
+          <span class="to"><code>HashSet&lt;String&gt; settled</code><br><span class="cost"><span class="good">O(1)</span> per check</span></span>
+        </div>
+        <div class="swap-row">
+          <span class="role">Extract-min<br><span style="font-style:normal;font-size:0.7rem;color:var(--paper-mute);font-family:'Inter Tight'">&ldquo;cheapest unsettled v?&rdquo;</span></span>
+          <span class="from">Linear scan over <code>cost[]</code><br><span class="cost"><span class="bad">O(V)</span> per pop</span></span>
+          <span class="to"><code>PriorityQueue</code> &mdash; binary heap<br><span class="cost"><span class="good">O(log&nbsp;V)</span> per pop</span></span>
+        </div>
+      </div>
+
+      <div class="swap-formula">
+        <div class="form-eq">O(V³)<span class="arrow">&rarr;</span>O((V+E)&nbsp;log&nbsp;V)</div>
+        <div class="form-note">
+          On <strong>V&nbsp;=&nbsp;1&nbsp;000, E&nbsp;=&nbsp;2&nbsp;600</strong>:<br>
+          ~10⁹ ops &nbsp;&rarr;&nbsp; ~3.6 × 10⁴ ops &nbsp;&middot;&nbsp; <strong>≈&nbsp;30 000× cheaper</strong>.
+        </div>
+      </div>
+
+      <div class="swap-insight">
+        <span class="kicker">The key insight</span>
+        The two swaps <strong>only work as a pair</strong>. A heap finds the minimum in O(log&nbsp;V), but only if the &ldquo;already settled?&rdquo; check is also fast &mdash; otherwise the heap saves us nothing. Replacing just one of the two ArrayList roles would still leave a quadratic loop. <em>The optimisation lives in the interaction, not in either structure alone.</em>
+      </div>
+
+    </div>
+
+  </div>
+</div>
+
+<!-- ================= 11. Why Dijkstra (complexity) ================= -->
+<div class="slide" data-slide="11">
   <div class="runner">
     <span class="left">Part Two · Graph</span>
     <span class="right">Why this algorithm</span>
   </div>
-  <span class="speaker-tag alex">Speaker · <em>Alex</em> &nbsp;&middot;&nbsp; 0:40</span>
+  <span class="speaker-tag alex">Speaker · <em>Alex</em> &nbsp;&middot;&nbsp; 0:25</span>
 
   <div class="chap-head">
     <div class="chap-num">§ 2.3</div>
@@ -3220,8 +3807,8 @@
   </div>
 </div>
 
-<!-- ================= 10. Task C OOP design ================= -->
-<div class="slide" data-slide="10">
+<!-- ================= 12. Task C OOP design ================= -->
+<div class="slide" data-slide="12">
   <span class="speaker-tag alex">Speaker: Alex &nbsp;|&nbsp; 1:10</span>
   <div class="chap-head">
     <div class="chap-num">III.</div>
@@ -3314,8 +3901,8 @@
   </div>
 </div>
 
-<!-- ================= 11. Task C data structures ================= -->
-<div class="slide" data-slide="11">
+<!-- ================= 13. Task C data structures ================= -->
+<div class="slide" data-slide="13">
   <span class="speaker-tag alex">Speaker: Alex &nbsp;|&nbsp; 0:40</span>
   <div class="chap-head">
     <div class="chap-num">§ 3.1</div>
@@ -3377,8 +3964,8 @@
   </div>
 </div>
 
-<!-- ================= 12. Task D reflection ================= -->
-<div class="slide" data-slide="12">
+<!-- ================= 14. Task D reflection ================= -->
+<div class="slide" data-slide="14">
   <span class="speaker-tag alex">Speaker: Alex &nbsp;|&nbsp; 0:50</span>
   <div class="chap-head">
     <div class="chap-num">IV.</div>
@@ -3453,8 +4040,8 @@
   </div>
 </div>
 
-<!-- ================= 13. Closing ================= -->
-<div class="slide" data-slide="13">
+<!-- ================= 15. Closing ================= -->
+<div class="slide" data-slide="15">
   <span class="speaker-tag alex">Speakers: Alex + Teammate &nbsp;|&nbsp; 0:30</span>
   <div class="chap-head">
     <div class="chap-num">V.</div>
