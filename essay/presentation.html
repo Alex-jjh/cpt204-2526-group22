@@ -71,6 +71,45 @@
   }
   .slide.active { display: flex; animation: pageIn 0.7s cubic-bezier(0.2, 0.7, 0.2, 1) both; }
 
+  /* Long-form slide: content overflows viewport vertically; user scrolls within. */
+  .slide.scroll-y {
+    /* Keep absolute positioning (inherited from .slide) so it still tracks the viewport,
+       but let internal content grow taller and scroll inside this container. */
+    overflow-y: auto;
+    overflow-x: hidden;
+    /* unset flex-direction:column min-height behaviour: allow content to dictate height */
+    align-items: stretch;
+    /* slim, monograph-style scrollbar */
+    scrollbar-width: thin;
+    scrollbar-color: rgba(200,150,79,0.4) transparent;
+  }
+  .slide.scroll-y > * { flex-shrink: 0; }
+  .slide.scroll-y::-webkit-scrollbar { width: 8px; }
+  .slide.scroll-y::-webkit-scrollbar-thumb {
+    background: rgba(200,150,79,0.35);
+    border-radius: 4px;
+  }
+  .slide.scroll-y::-webkit-scrollbar-track { background: transparent; }
+  /* Disable the inner-frame clipping for tall slides */
+  .slide.scroll-y::before,
+  .slide.scroll-y::after { display: none; }
+  .slide.scroll-y .scroll-hint {
+    position: sticky;
+    bottom: 12px;
+    align-self: flex-end;
+    margin-top: 18px;
+    padding: 4px 10px;
+    font-family: 'Inter Tight', sans-serif;
+    font-size: 0.6em;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: var(--gold-soft);
+    background: rgba(10,13,18,0.78);
+    border: 1px solid rgba(200,150,79,0.3);
+    pointer-events: none;
+    z-index: 5;
+  }
+
   @keyframes pageIn {
     from { opacity: 0; transform: translateY(8px); filter: blur(2px); }
     to   { opacity: 1; transform: translateY(0);  filter: blur(0); }
@@ -2499,7 +2538,7 @@
   }
   .ds-row {
     display: grid;
-    grid-template-columns: 130px 175px 1fr;
+    grid-template-columns: 120px 220px 1fr;
     gap: 16px;
     padding: 12px 0;
     border-bottom: 1px solid rgba(239,230,210,0.08);
@@ -2522,6 +2561,8 @@
     border-left: 2px solid var(--gold);
     line-height: 1.4;
     align-self: start;
+    word-break: break-word;
+    overflow-wrap: anywhere;
   }
   .ds-row .ds-why {
     font-family: 'Newsreader', serif;
@@ -2538,6 +2579,209 @@
     font-size: 0.85em;
     color: var(--gold-soft);
     background: transparent;
+  }
+  .ds-row .ds-figure {
+    grid-column: 2 / 4;
+    margin-top: 10px;
+    padding: 10px 12px 12px;
+    border-left: 1px dotted rgba(200,150,79,0.35);
+    background: rgba(200,150,79,0.04);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7em;
+    line-height: 1.55;
+    color: var(--paper-dim);
+    letter-spacing: 0.01em;
+  }
+  .ds-row .ds-figure .fig-tag {
+    font-family: 'Inter Tight', sans-serif;
+    font-size: 0.78em;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: var(--vermillion);
+    margin-right: 0.6em;
+  }
+  .ds-row .ds-figure .fig-caption {
+    font-family: 'Newsreader', serif;
+    font-style: italic;
+    font-size: 1.05em;
+    color: var(--paper-mute);
+    margin-top: 4px;
+    letter-spacing: 0;
+  }
+  /* contiguous array memory cells */
+  .mem-array {
+    display: flex;
+    align-items: stretch;
+    gap: 0;
+    margin-top: 6px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .mem-array .cell {
+    border: 1px solid rgba(200,150,79,0.4);
+    border-right-width: 0;
+    padding: 4px 7px;
+    font-size: 0.95em;
+    color: var(--paper);
+    background: rgba(200,150,79,0.06);
+    text-align: center;
+    min-width: 52px;
+    position: relative;
+  }
+  .mem-array .cell:last-child { border-right-width: 1px; }
+  .mem-array .cell .idx {
+    display: block;
+    font-size: 0.65em;
+    color: var(--paper-mute);
+    letter-spacing: 0.1em;
+    margin-top: 2px;
+  }
+  .mem-array .cell.gap {
+    background: transparent;
+    border-style: dashed;
+    color: var(--paper-mute);
+  }
+
+  /* hashmap buckets + chained entries */
+  .mem-hashmap {
+    display: grid;
+    grid-template-columns: 92px 1fr;
+    column-gap: 12px;
+    row-gap: 4px;
+    margin-top: 6px;
+  }
+  .mem-hashmap .bucket-label {
+    font-family: 'Inter Tight', sans-serif;
+    font-size: 0.85em;
+    color: var(--paper-mute);
+    text-align: right;
+    padding: 4px 0;
+    letter-spacing: 0.05em;
+  }
+  .mem-hashmap .bucket-row {
+    display: flex; align-items: center; gap: 4px;
+    flex-wrap: wrap;
+    border-left: 2px solid rgba(200,150,79,0.25);
+    padding: 2px 0 2px 8px;
+  }
+  .mem-hashmap .bucket-row .arrow { color: var(--paper-mute); font-size: 0.8em; }
+  .mem-hashmap .bucket-row .kv-arrow {
+    font-family: 'Inter Tight', sans-serif;
+    font-size: 0.7em;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--gold-soft);
+    padding: 0 4px;
+  }
+  .mem-hashmap .bucket-row .list-comma {
+    color: var(--paper-mute);
+    font-size: 1.1em;
+    margin: 0 -2px;
+  }
+  .mem-hashmap .key-entry {
+    background: rgba(200,150,79,0.14);
+    border-color: var(--gold);
+  }
+  .mem-hashmap .key-entry .k { color: var(--gold); font-weight: 600; }
+  .mem-hashmap .entry {
+    border: 1px solid rgba(200,150,79,0.35);
+    background: rgba(200,150,79,0.05);
+    padding: 2px 7px;
+    font-size: 0.95em;
+    color: var(--paper);
+    border-radius: 0;
+  }
+  .mem-hashmap .entry .k { color: var(--gold); }
+  .mem-hashmap .entry .v { color: var(--paper-dim); margin-left: 0.3em; }
+  .mem-hashmap .entry .v::before { content: "→ "; color: var(--paper-mute); }
+  .mem-hashmap .entry.empty {
+    color: var(--paper-mute);
+    background: transparent;
+    border-style: dashed;
+    font-style: italic;
+  }
+
+  /* binary heap tree */
+  .mem-heap {
+    margin-top: 6px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .mem-heap .lvl {
+    display: flex;
+    justify-content: center;
+    gap: 22px;
+    position: relative;
+  }
+  .mem-heap .lvl + .lvl { margin-top: 18px; }
+  .mem-heap .lvl + .lvl::before {
+    content: "";
+    position: absolute;
+    top: -14px; left: 0; right: 0; height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(200,150,79,0.25), transparent);
+  }
+  .mem-heap .hnode {
+    border: 1px solid rgba(200,150,79,0.4);
+    background: rgba(10,13,18,0.55);
+    padding: 3px 8px;
+    font-size: 0.95em;
+    color: var(--paper);
+    border-radius: 50%;
+    min-width: 38px;
+    text-align: center;
+    line-height: 1.2;
+  }
+  .mem-heap .hnode.root {
+    border-color: var(--gold);
+    background: rgba(200,150,79,0.12);
+    color: var(--gold);
+    font-weight: 600;
+  }
+  .mem-heap .hnode .lab {
+    display: block;
+    font-size: 0.7em;
+    color: var(--paper-mute);
+  }
+  .mem-heap .hnote {
+    margin-top: 6px;
+    font-family: 'Newsreader', serif;
+    font-style: italic;
+    font-size: 1em;
+    color: var(--paper-mute);
+  }
+  .mem-heap .hnote .arr-d { color: var(--gold); font-style: normal; }
+
+  /* hashset: same buckets but key-only */
+  .mem-hashset {
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    gap: 4px;
+    margin-top: 6px;
+  }
+  .mem-hashset .slot {
+    border: 1px solid rgba(200,150,79,0.3);
+    padding: 3px 4px;
+    font-size: 0.85em;
+    text-align: center;
+    color: var(--paper);
+    background: rgba(200,150,79,0.04);
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .mem-hashset .slot.empty {
+    color: var(--paper-mute);
+    border-style: dashed;
+    background: transparent;
+  }
+  .mem-hashset .slot.filled {
+    background: rgba(122,149,118,0.12);
+    border-color: rgba(122,149,118,0.5);
+    color: var(--paper);
+  }
+  .mem-hashset .slot .h {
+    display: block;
+    font-size: 0.65em;
+    color: var(--paper-mute);
   }
 
   .lineage-frame {
@@ -3902,7 +4146,7 @@
 </div>
 
 <!-- ================= 13. Task C data structures ================= -->
-<div class="slide" data-slide="13">
+<div class="slide scroll-y" data-slide="13">
   <span class="speaker-tag alex">Speaker: Alex &nbsp;|&nbsp; 0:40</span>
   <div class="chap-head">
     <div class="chap-num">§ 3.1</div>
@@ -3918,21 +4162,95 @@
         <div class="ds-where">Candidate lists</div>
         <div class="ds-type">ArrayList&lt;Candidate&gt;</div>
         <div class="ds-why">Sort-then-iterate workload. <span class="ds-cost">O(1)</span> random access; contiguous memory is cache-friendly. <strong>No mid-list inserts</strong> — so we pay nothing for them.</div>
+        <div class="ds-figure">
+          <span class="fig-tag">In memory</span> A backing array of contiguous slots.
+          <div class="mem-array">
+            <div class="cell">L0001<span class="idx">[0]</span></div>
+            <div class="cell">L0002<span class="idx">[1]</span></div>
+            <div class="cell">L0003<span class="idx">[2]</span></div>
+            <div class="cell">L0004<span class="idx">[3]</span></div>
+            <div class="cell">…<span class="idx">[…]</span></div>
+            <div class="cell">L0999<span class="idx">[998]</span></div>
+            <div class="cell">L1000<span class="idx">[999]</span></div>
+          </div>
+          <div class="fig-caption">Address of slot <em>i</em> is just <code>base + i × 8</code> — that's why <code>get(i)</code> is O(1) and the sort algorithms can swap adjacent slots without chasing pointers.</div>
+        </div>
       </div>
       <div class="ds-row">
         <div class="ds-where">Graph adjacency</div>
         <div class="ds-type">HashMap&lt;String,&nbsp;List&lt;Arc&gt;&gt;</div>
         <div class="ds-why"><span class="ds-cost">O(1)</span> lookup of a node's neighbours by ID. Sparse-graph efficient: 2 600 edges, not 1 000² entries. <strong>Adjacency, not matrix.</strong></div>
+        <div class="ds-figure">
+          <span class="fig-tag">In memory</span> Bucket array; each bucket holds one node's neighbour list.
+          <div class="mem-hashmap">
+            <span class="bucket-label">bucket[h(L0001)]</span>
+            <span class="bucket-row">
+              <span class="entry key-entry"><span class="k">L0001</span></span><span class="arrow kv-arrow">value →</span>
+              <span class="entry"><span class="v">Arc(L0002,&nbsp;2)</span></span><span class="arrow list-comma">,</span>
+              <span class="entry"><span class="v">Arc(L0340,&nbsp;4)</span></span>
+            </span>
+            <span class="bucket-label">bucket[h(L0105)]</span>
+            <span class="bucket-row">
+              <span class="entry key-entry"><span class="k">L0105</span></span><span class="arrow kv-arrow">value →</span>
+              <span class="entry"><span class="v">Arc(L0106,&nbsp;1)</span></span><span class="arrow list-comma">,</span>
+              <span class="entry"><span class="v">Arc(L0474,&nbsp;3)</span></span><span class="arrow list-comma">,</span>
+              <span class="entry"><span class="v">Arc(L0592,&nbsp;9)</span></span><span class="arrow list-comma">,</span>
+              <span class="entry"><span class="v">Arc(L0130,&nbsp;10)</span></span>
+            </span>
+            <span class="bucket-label">bucket[…]</span>
+            <span class="bucket-row">
+              <span class="entry empty">… 998 more buckets, one per node</span>
+            </span>
+          </div>
+          <div class="fig-caption">
+            Read as: <strong>key</strong> <code>L0105</code> &nbsp;→&nbsp; <strong>value</strong> = its neighbour list <code>[Arc(L0106,1), Arc(L0474,3), Arc(L0592,9), Arc(L0130,10)]</code>.
+            All four <code>Arc</code>s belong to <code>L0105</code> &mdash; they are L0105's outgoing edges. <em>Arcs in the same list are not connected to each other.</em>
+            <code>adjacency.get("L0105")</code> hashes the key, jumps to one bucket, returns that whole <code>List&lt;Arc&gt;</code> in O(1).
+          </div>
+        </div>
       </div>
       <div class="ds-row">
         <div class="ds-where">Dijkstra frontier</div>
         <div class="ds-type">PriorityQueue&lt;Entry&gt;</div>
         <div class="ds-why">Binary heap. <span class="ds-cost">O(log&nbsp;V)</span> extract-min — <strong>the reason we beat O(V²)</strong> on every shortest path query.</div>
+        <div class="ds-figure">
+          <span class="fig-tag">In memory</span> A binary heap — every parent ≤ both children. <code>poll()</code> always returns the root.
+          <div class="mem-heap">
+            <div class="lvl">
+              <div class="hnode root">3<span class="lab">L0340</span></div>
+            </div>
+            <div class="lvl">
+              <div class="hnode">7<span class="lab">L0339</span></div>
+              <div class="hnode">5<span class="lab">L0247</span></div>
+            </div>
+            <div class="lvl">
+              <div class="hnode">9<span class="lab">L0017</span></div>
+              <div class="hnode">12<span class="lab">L0128</span></div>
+              <div class="hnode">8<span class="lab">L0107</span></div>
+              <div class="hnode">11<span class="lab">L0106</span></div>
+            </div>
+            <div class="hnote">Stored as an <span class="arr-d">array</span>: index 0 is root, children of <code>i</code> are at <code>2i+1</code> and <code>2i+2</code>. No pointers — just arithmetic.</div>
+          </div>
+        </div>
       </div>
       <div class="ds-row">
         <div class="ds-where">Settled set</div>
         <div class="ds-type">HashSet&lt;String&gt;</div>
         <div class="ds-why"><span class="ds-cost">O(1)</span> "have we already finalised this node?" — replaces a linear scan that would dominate the run-time.</div>
+        <div class="ds-figure">
+          <span class="fig-tag">In memory</span> A bucket array of keys only. Each ID hashes to one slot; lookup is one hash + one equals.
+          <div class="mem-hashset">
+            <div class="slot empty">∅<span class="h">[0]</span></div>
+            <div class="slot filled">L0001<span class="h">[1]</span></div>
+            <div class="slot empty">∅<span class="h">[2]</span></div>
+            <div class="slot filled">L0340<span class="h">[3]</span></div>
+            <div class="slot filled">L0339<span class="h">[4]</span></div>
+            <div class="slot empty">∅<span class="h">[5]</span></div>
+            <div class="slot filled">L0247<span class="h">[6]</span></div>
+            <div class="slot empty">∅<span class="h">[7]</span></div>
+          </div>
+          <div class="fig-caption"><code>settled.add("L0107")</code> hashes "L0107", lands in (say) slot [4], returns <code>true</code> if the slot was empty, <code>false</code> if "L0107" was already there. That single Boolean replaces a linear scan over <code>ArrayList&lt;Integer&gt; T</code>.</div>
+        </div>
       </div>
     </div>
 
@@ -3962,6 +4280,8 @@
     <strong>A note on <code>Edge</code> vs <code>Arc</code>.</strong>
     The graph is undirected, yet each edge is stored <em>twice</em> in the adjacency list — once as a directed <code>Arc</code> from each endpoint. Why pay double the memory? Because Dijkstra's inner loop asks "give me node <em>u</em>'s neighbours" on every pop. With a single shared <code>Edge</code>, that loop would have to ask "which end is me?" on every access — a string comparison inside the hottest path. Storing two directed <code>Arc</code>s lets <code>arc.to()</code> be a direct field read. <strong>Space-for-time, where the time is the inner loop of every query.</strong>
   </div>
+
+  <div class="scroll-hint">↓ scroll for HashSet · Edge vs Arc</div>
 </div>
 
 <!-- ================= 14. Task D reflection ================= -->
