@@ -5,14 +5,14 @@
 We used **Trello** as the AI-assisted task-management tool throughout
 the six-day final sprint. Trello belongs to the Atlassian product
 family that the module's session slides explicitly named (Jira / Trello)
-and ships several AI-empowered features — automatic activity logging,
-smart reminders, and the Butler automation engine — that satisfy the
+and ships several AI-empowered features (automatic activity logging,
+smart reminders, and the Butler automation engine) that satisfy the
 "AI-assisted Software Management tool" requirement.
 
 ### How we used it
 
-The board was structured as a five-column Kanban — `Backlog`,
-`This Week`, `In Progress`, `Review`, `Done` — with one card per
+The board was structured as a five-column Kanban (`Backlog`,
+`This Week`, `In Progress`, `Review`, `Done`) with one card per
 deliverable. Every card carried four pieces of metadata:
 
 1. A **colour-coded label** identifying which task (A–E) the card
@@ -51,14 +51,14 @@ Three considerations drove the planning structure:
 - **Visibility under low-bandwidth coordination.** Two team members
   working in different time zones cannot rely on synchronous
   meetings. The Kanban board gives both of us asynchronous visibility:
-  whoever wakes up first sees what's blocked, what's in progress, and
-  what was just finished — without requiring the other person to be
+  whoever wakes up first sees what is blocked, what is in progress, and
+  what was just finished, without requiring the other person to be
   online.
 
 ### Advantages of AI-assisted task management
 
 - **Activity log captures coordination automatically.** Every move
-  between columns, every checklist tick, every comment is timestamped
+  between columns, every checklist tick, and every comment is timestamped
   and attributed. We never had to write a separate progress report;
   the board *is* the progress report.
 - **Due-date reminders surface slipping work without nagging.** Trello
@@ -89,7 +89,7 @@ Three considerations drove the planning structure:
 
 A separate but related caveat applies to our use of AI **for content**
 (grammar polishing, code-readability suggestions). AI tools
-occasionally produce confidently-wrong claims — for example, an early
+occasionally produce confidently-wrong claims; for example, an early
 suggestion to pull in a third-party shortest-path library would have
 violated the CPT204 library allowlist. This is the well-known
 "hallucination" failure mode, and the right mitigation is the same one
@@ -137,7 +137,7 @@ Three concrete exclusions are visible in the current implementation:
   (e.g. FreeTTS, MaryTTS) can synthesise a sentence-level summary of
   a `PathResult`: "Travel from location 1 to location 10 via 6 stops,
   total distance 27 units." This requires extending `PathResult` with
-  a `formatSpeech()` method alongside the existing `formatPath()`.
+  a `formatSpeech()` method alongside `formatPath()`.
 - **Internationalisation (i18n)** for diverse linguistic backgrounds.
   Java's `java.util.ResourceBundle` plus locale-aware
   `String.format` lets us swap user-facing strings via a single
@@ -164,7 +164,7 @@ Three concrete exclusions are visible in the current implementation:
 - **Testing burden.** EDI features multiply the test surface (every
   feature × every locale × every assistive technology). Mitigation:
   integrate accessibility checks into automated tests using a tool
-  like Java Accessibility Bridge — caught regressions are cheaper
+  like Java Accessibility Bridge; caught regressions are cheaper
   than missed ones.
 
 The deeper point is that EDI improvements are not a separate, optional
@@ -172,7 +172,7 @@ The deeper point is that EDI improvements are not a separate, optional
 early, cost very little, and made late, cost a lot. The architectural
 isolation between data (`Candidate`, `Edge`, `PathResult`) and
 presentation (`Main`) in our current code means a future GUI/TTS
-layer can be bolted on without disturbing the algorithms — exactly the
+layer can be bolted on without disturbing the algorithms, exactly the
 abstraction property argued for in §3.3.
 
 ## 4.3 Life-long Learning and Future Improvement
@@ -195,13 +195,12 @@ this project:
    report.** Switching the benchmark from `currentTimeMillis` to
    `nanoTime` did not change any algorithm, but it transformed the
    Task A timing table from a row of zeros to data with three
-   decimal places of meaningful contrast. The lesson — that
-   measurement methodology is itself a deliverable — applies to any
-   software role.
+   decimal places of meaningful contrast. The lesson (that measurement
+   methodology is itself a deliverable) applies to any software role.
 3. **Documentation is not after-the-fact; it *is* the work.** The
    Experience Sharing PDF distributed to the cohort makes this point
    explicitly, and our sprint validates it: every screenshot, every
-   commit message, every Trello card description we produced *during*
+   commit message, and every Trello card description we produced *during*
    the work was an artefact we needed *for* the report. Teams that
    defer documentation pay it back at a higher interest rate.
 
@@ -257,8 +256,8 @@ Beyond these three, the system has obvious opportunities for a
 graphical front-end (JavaFX) and multilingual support (§4.2), but the
 algorithmic upgrades above offer the highest value-per-effort ratio.
 
-The unifying lesson — the one we will carry forward beyond CPT204 —
+The unifying lesson, and the one we will carry forward beyond CPT204,
 is that the gap between a working program and a useful, evolving
 system is bridged not by writing more code but by understanding the
-problem more deeply, documenting decisions in the moment, and
-leaving the architecture honest enough to admit later change.
+problem more deeply, documenting decisions in the moment, and leaving
+the architecture honest enough to admit later change.

@@ -4,9 +4,9 @@
 
 The shortest-path infrastructure for Task B is built from `paths.csv`.
 Each row of that file (`from_location, to_location, weight`) is parsed
-by `io/CsvReader.readEdges` into an immutable `model.Edge` triple, which
-the `model.Edge` constructor validates to reject negative weights — a
-necessary precondition for Dijkstra's algorithm (see §2.3 below).
+by `io/CsvReader.readEdges` into an immutable `model.Edge` triple, whose
+constructor rejects negative weights, a necessary precondition for
+Dijkstra's algorithm (see §2.3 below).
 
 The graph itself is stored as an **adjacency list**, modelled as
 `HashMap<String, List<Arc>>` inside `graph.Graph`. Because the
@@ -39,7 +39,7 @@ Notes on the printed paths:
   i.e. it walks into the waypoint and then out again along the same
   edges. The `findVia` implementation correctly removes the duplicated
   joining node when concatenating segments, so the printed path lists
-  L0105 once, but the cost still correctly counts the two edges traversed
+  L0105 once; the cost still correctly counts the two edges traversed
   to leave the waypoint. This behaviour is the source of the
   segment-wise-vs-globally-optimal discussion in §2.4 below.
 
@@ -105,10 +105,10 @@ The Week 10 lecture distributed a `WeightedGraph.getShortestPath`
 implementation that uses two `ArrayList`-based structures inside the
 relaxation loop: an `ArrayList<Integer> T` to record settled vertices,
 and a linear scan over the parallel `cost[]` array to extract the next
-minimum. That code runs at **O(V³)** on this graph — not because the
+minimum. That code runs at **O(V³)** on this graph, not because the
 algorithm is wrong, but because the auxiliary data structures impose
 two unnecessary linear scans per iteration. The lecturer flagged this
-explicitly during the session ("*What if we don't use
+explicitly during the session ("*What if we do not use
 `ArrayList<Integer> T`? What if we use other data structures?*"), and
 this section answers that question concretely.
 
@@ -127,7 +127,7 @@ Composing the two costs over V iterations of the outer `while`:
 
 That is roughly a **30 000× reduction in operation count** without any
 change to the algorithmic logic. The relaxation rule, the priority
-ordering, and the settled-vertex invariant are all unchanged — what
+ordering, and the settled-vertex invariant are all unchanged; what
 changes is how the loop *finds* the next vertex and *checks* whether
 it has been settled.
 
@@ -147,7 +147,7 @@ the slide deck (slide 9): they are conceptually one decision.
 A small implementation detail completes the picture. Our heap does not
 support O(log V) `decreaseKey`, so when relaxation improves a node's
 distance we push a fresh `(node, new_distance)` entry rather than
-updating the old one — the well-known **lazy-deletion** pattern. Stale
+updating the old one: the well-known **lazy-deletion** pattern. Stale
 entries are filtered on pop by the `settled.add(...)` check
 (`if (!settled.add(cur.node)) continue;`). The `HashSet` therefore
 serves a second purpose beyond fast membership: it makes lazy deletion
@@ -156,9 +156,9 @@ trivial. This reuse is part of why the two swaps compose so cleanly.
 ## 2.4 Local vs Global Optimality
 
 A natural next question is whether the four cases in §2.2 are *jointly*
-optimal — that is, whether running Dijkstra optimally for each case
-implies that the inspection-planning problem as a whole is solved
-optimally. The answer is **no**, for two distinct reasons.
+optimal: whether running Dijkstra optimally for each case implies that
+the inspection-planning problem as a whole is solved optimally. The
+answer is **no**, for two distinct reasons.
 
 ### Reason 1: Segment-wise stitching is not globally optimal
 
@@ -198,16 +198,15 @@ L0001 → L0105 finds it cheapest to go via the L0107 → L0106 → L0105
 chain, and then the segment L0105 → L0101 retraces L0105 → L0106 →
 L0107 because the first cost-effective branch out of L0105 leads back
 through that same chain. The duplicated traversal accounts for two
-extra edge weights in the total cost; an algorithm aware of both
+extra edge weights in the total cost. An algorithm aware of both
 segments could in principle plan a different route into L0105 to avoid
 having to retrace, but `findVia` cannot.
 
 The principled fix is to model "shortest path through a sequence of
 required waypoints" as a single optimisation, not as a chain of
 independent shortest paths. For *k* waypoints this can be solved by
-Bellman–Held–Karp (O(2^k · V²)) or — in the unconstrained-order case —
-by a TSP-like formulation. Both are out of scope for the current
-project.
+Bellman–Held–Karp (O(2^k · V²)), or in the unconstrained-order case by
+a TSP-like formulation. Both are out of scope for the current project.
 
 ### Reason 2: The inspection-planning problem is not just a sum of queries
 
@@ -232,7 +231,7 @@ The comparison: BFS is asymptotically faster (no `log V` factor) and
 has a simpler implementation (no priority queue, no relaxation), but
 it is correct only when all edges have equal cost. For our weighted
 infrastructure graph BFS would return a path with the fewest hops, not
-the lowest total weight — these are different paths in general.
+the lowest total weight; these are different paths in general.
 
 ### If the graph were much larger or had node coordinates
 
@@ -241,12 +240,12 @@ Dijkstra: instead of expanding the lowest-distance node, it expands
 the node minimising `dist + h(node, end)`, where `h` is an admissible
 heuristic estimating the remaining distance. With a useful heuristic
 (e.g. straight-line Euclidean distance when node coordinates are
-available) A\* explores far fewer nodes than Dijkstra, which is
-important when V is large.
+available) A\* explores far fewer nodes than Dijkstra, which matters
+when V is large.
 
 The comparison: A\* matches or beats Dijkstra in practice when a good
 heuristic exists, has the same worst-case complexity, but **requires
-an admissible heuristic** — Dijkstra is essentially A\* with `h ≡ 0`.
+an admissible heuristic** (Dijkstra is essentially A\* with `h ≡ 0`).
 The current `paths.csv` has no coordinate information, so we have no
 heuristic and gain nothing from A\*; if the dataset were extended with
 latitude/longitude per node, A\* would become attractive at large V.
@@ -258,6 +257,6 @@ latitude/longitude per node, A\* would become attractive at large V.
   extra cost is unjustified.
 - **Floyd–Warshall** (O(V³)) computes all-pairs shortest paths up
   front. For four queries on a 1000-node graph this would be ≈ 10⁹
-  operations versus ≈ 4 × 3.6 × 10⁴ for four heap-Dijkstras — slower
+  operations versus ≈ 4 × 3.6 × 10⁴ for four heap-Dijkstras: slower
   by four orders of magnitude. Floyd–Warshall is the right choice
   only when the number of queries is comparable to V².

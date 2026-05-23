@@ -9,7 +9,7 @@ intermediate results; (2) the classes and their responsibilities; and
 
 ## 3.1 Data Structures
 
-### Candidate datasets — `ArrayList<Candidate>`
+### Candidate datasets: `ArrayList<Candidate>`
 
 Each of the three input CSVs is read into an `ArrayList<Candidate>`.
 `ArrayList` is the natural choice for sortable input data:
@@ -34,9 +34,9 @@ public static final Comparator<Candidate> RANKING =
 
 This places the sort order *with the data* rather than scattered
 through the sorters, so swapping the ranking rule (say, ascending
-priority instead of descending) requires changing one place.
+priority instead of descending) requires changing only one place.
 
-### Weighted graph — adjacency list `HashMap<String, List<Arc>>`
+### Weighted graph: adjacency list `HashMap<String, List<Arc>>`
 
 `graph.Graph` represents the undirected weighted network using an
 adjacency list:
@@ -52,7 +52,7 @@ the list uses O(V + E) cells. The list also gives O(deg(v)) neighbour
 iteration, which is exactly what Dijkstra's relaxation loop needs.
 
 `HashMap` is preferred over `TreeMap` here because we never need keys
-in sorted order — we look up by exact location id, an O(1)-average
+in sorted order; we look up by exact location id, an O(1)-average
 operation on `HashMap`. `ArrayList<Arc>` for each node's neighbour list
 keeps neighbour iteration contiguous in memory.
 
@@ -66,7 +66,7 @@ inserted as **two** `Arc`s (one in each direction) by `Graph.addEdge`,
 which is the conventional encoding of an undirected graph as a
 directed adjacency list.
 
-This double-storage looks redundant — the same edge appears twice — so
+This double-storage looks redundant (the same edge appears twice), so
 it is worth justifying explicitly. We considered three encodings:
 
 1. **Single `List<Edge>`, no adjacency.** Most compact (each edge
@@ -81,9 +81,9 @@ it is worth justifying explicitly. We considered three encodings:
    "*which* end of this edge is me?", a string comparison plus a
    ternary. Subtle, but it sits inside Dijkstra's hottest inner loop.
 3. **Adjacency list keyed on directed `Arc`s** (the option we chose).
-   Each edge is stored twice — once from each endpoint's point of
-   view — so `arc.to()` and `arc.weight()` are direct field reads with
-   no branching. Memory cost: 5 200 `Arc` objects instead of 2 600,
+   Each edge is stored twice (once from each endpoint's point of view),
+   so `arc.to()` and `arc.weight()` are direct field reads with no
+   branching. Memory cost: 5 200 `Arc` objects instead of 2 600,
    negligible at this scale.
 
 The trade-off is space-for-time, **and the time being saved is in
@@ -93,7 +93,7 @@ The semantic distinction also pays a clarity dividend: `Edge` lives in
 an implementation detail of `graph.Graph` that callers never see. The
 two abstractions can evolve independently.
 
-### Priority queue — binary heap via `java.util.PriorityQueue`
+### Priority queue: binary heap via `java.util.PriorityQueue`
 
 Dijkstra's open set is stored in a `java.util.PriorityQueue<Entry>`,
 where `Entry` is the `(node, current best distance)` pair. The standard
@@ -108,7 +108,7 @@ push a new entry rather than locating and updating the old entry
 skip any entry whose node has already been settled. This is simpler
 than implementing an indexed heap and asymptotically equivalent.
 
-### Result types — immutable records
+### Result types: immutable records
 
 Both algorithm pipelines return immutable result objects:
 
@@ -131,7 +131,7 @@ the sorting pipeline and the shortest-path pipeline.
 we depend on (`ArrayList`, `HashMap`, `PriorityQueue`) sit in Java's
 Collection / Map hierarchy.
 
-### Layer 1 — immutable data carriers
+### Layer 1: immutable data carriers
 
 These classes hold data and have no algorithmic behaviour of their own.
 
@@ -146,15 +146,15 @@ All four are `final` classes with `final` private fields, exposed only
 via getters, and constructed once. They cannot be mutated after
 creation.
 
-### Layer 2 — service / utility
+### Layer 2: service / utility
 
 | Class | Responsibility |
 |---|---|
-| `io.CsvReader` | Reads `candidates_*.csv` and `paths.csv` into `List<Candidate>` and `List<Edge>` respectively. Utility class — private constructor, only static methods. |
+| `io.CsvReader` | Reads `candidates_*.csv` and `paths.csv` into `List<Candidate>` and `List<Edge>` respectively. Utility class with a private constructor and only static methods. |
 | `graph.Graph` | The adjacency-list representation of the undirected weighted graph. Hosts `addEdge`, `addNode`, `neighbours`, and the `fromEdges` factory. The inner class `Graph.Arc` represents one outgoing arc. |
 | `sort.SortBenchmark` | Runs a `Sorter` for one warm-up run and *k* timed runs on a fresh copy of the input each time, returns the average runtime in `Result`. |
 
-### Layer 3 — algorithm abstractions and implementations
+### Layer 3: algorithm abstractions and implementations
 
 | Type | Responsibility |
 |---|---|
@@ -163,15 +163,15 @@ creation.
 | `graph.ShortestPathFinder` | Interface. Single abstract method `find(graph, start, end)` plus a `default` method `findVia(graph, start, waypoints, end)` that concatenates point-to-point segments. |
 | `graph.DijkstraShortestPath` | Implementation of `ShortestPathFinder` using a binary-heap priority queue. The inner class `DijkstraShortestPath.Entry` is the heap element. |
 
-### Layer 4 — driver
+### Layer 4: driver
 
 | Class | Responsibility |
 |---|---|
 | `app.Main` | Wires all of the above together. Reads the three candidate CSVs, runs the benchmark for each algorithm on each dataset, prints the timing table and top-10s, builds the graph, runs each of the four required Task B cases, prints the result. |
 
 `Main` is *only* an orchestrator: every algorithm is reached through
-its interface, never through the concrete class. This matters for the
-polymorphism discussion in §3.3.
+its interface, never through the concrete class. This shape matters for
+the polymorphism discussion in §3.3.
 
 ### How the classes collaborate
 
@@ -195,12 +195,12 @@ The end-to-end flow is:
 `Main` therefore depends on the interfaces, not on concrete
 implementations. Adding a new sorter (say, Heap Sort) or a new
 shortest-path algorithm (say, A\*) is a one-line change in `Main`'s
-factory list — no other code changes.
+factory list, with no other code changes.
 
 ## 3.3 Object-Oriented Principles
 
-The four core OOP principles — encapsulation, inheritance, abstraction,
-polymorphism — all appear in the design, each with concrete code
+The four core OOP principles (encapsulation, inheritance, abstraction,
+polymorphism) all appear in the design, each with concrete code
 evidence.
 
 ### Encapsulation
@@ -248,13 +248,12 @@ We deliberately use **interface inheritance** rather than abstract-base-
 class inheritance. The three sorters share no state and almost no code
 (each algorithm has a fundamentally different shape: nested loops for
 Bubble, divide-and-conquer recursion for Merge, in-place partitioning
-for Quick). An abstract `AbstractSorter` would not have anything
-non-trivial to put in a shared base. Java interfaces also support
-**default methods**, which we use on `ShortestPathFinder.findVia` to
-provide a free implementation of multi-waypoint stitching for any
-class that implements `find`. This is the same pattern that lets
-`Iterator` define `forEachRemaining` once and have every iterator
-inherit it.
+for Quick). An abstract `AbstractSorter` would have nothing non-trivial
+to put in a shared base. Java interfaces also support **default
+methods**, which we use on `ShortestPathFinder.findVia` to provide a
+free implementation of multi-waypoint stitching for any class that
+implements `find`. This is the same pattern that lets `Iterator` define
+`forEachRemaining` once and have every iterator inherit it.
 
 ### Abstraction
 
@@ -295,7 +294,7 @@ on the actual object type. This is *dynamic dispatch*, the textbook
 mechanism that lets one piece of client code drive an unbounded family
 of algorithm implementations.
 
-The same pattern recurs in the shortest-path side of the system, where
+The same pattern recurs on the shortest-path side of the system, where
 `Main` holds the algorithm in a variable of the interface type:
 
 ```java

@@ -21,12 +21,12 @@ breakdown beyond the percentage.
 | `model/*`, `io/CsvReader`, `sort/*`, `SortBenchmark` | lead | review |
 | `graph/*`, `DijkstraShortestPath`, `findVia` | review | lead |
 | Benchmark methodology upgrades (warm-up + nanoTime) | lead | review |
-| Chapter 1 (Task A) prose | review | lead — first draft |
-| Chapter 2 (Task B) prose | review | lead — first draft |
+| Chapter 1 (Task A) prose | review | lead (first draft) |
+| Chapter 2 (Task B) prose | review | lead (first draft) |
 | Chapter 3 (Task C) prose + UML diagrams | lead | review |
-| Chapter 4 (Task D) prose | lead — half | lead — half |
+| Chapter 4 (Task D) prose | lead (half) | lead (half) |
 | Trello board setup and AI-tool screenshots | lead | review |
-| Slide deck (Task E) | review | lead — first draft |
+| Slide deck (Task E) | review | lead (first draft) |
 | Joint video recording | co-recorded | co-recorded |
 | Final formatting + submission | lead | review |
 

@@ -21,7 +21,7 @@ flagging because they directly shape the empirical results that follow:
   pathological O(n²) behaviour that naive first/last-pivot Quick Sort
   exhibits on already-sorted input.
 - **Merge Sort** is top-down with a single auxiliary buffer of size *n*,
-  so its space cost is O(n) and not O(n log n).
+  so its space cost is O(n), not O(n log n).
 
 ### Measurement methodology
 
@@ -40,10 +40,10 @@ the following protocol:
    to three decimal places.
 
 The measurement harness is implemented once in `sort/SortBenchmark.java`
-and is reused by all three algorithms — the timing code is identical, so
-any difference in reported time reflects only the algorithm under test.
-All timings below were obtained on Amazon Corretto 21
-(JDK 21.0.11) on a macOS Apple-silicon machine.
+and reused by all three algorithms; the timing code is identical, so any
+difference in reported time reflects only the algorithm under test. All
+timings below were obtained on Amazon Corretto 21 (JDK 21.0.11) on a
+macOS Apple-silicon machine.
 
 ### Required Output
 
@@ -73,7 +73,7 @@ Merge Sort on this dataset: at n = 1000, the constant factor of a single
 linear pass beats a Θ(n log n) algorithm.
 
 **Dataset B is randomly shuffled**. Bubble Sort here is closest to its
-average case (and approaches its worst case): 3.169 ms — about 30× the
+average case (and approaches its worst case): 3.169 ms, about 30× the
 Dataset A figure. Quick Sort dominates this dataset (0.072 ms) because
 random input is exactly the regime in which the median-of-three pivot
 yields balanced partitions and the divide-and-conquer recursion runs at
@@ -90,18 +90,18 @@ half is exhausted and (b) Lomuto partition behaves slightly worse on
 ties than ideal due to many "equal-to-pivot" elements clustering on one
 side. Bubble Sort is moderately slow (0.748 ms): its early-exit flag
 still helps because adjacent equal elements never trigger a swap, but
-not as dramatically as on the already-sorted Dataset A.
+less dramatically than on the already-sorted Dataset A.
 
 ### Which algorithm performs best on each dataset?
 
 Each of the three algorithms wins on exactly one dataset, which is a
 useful illustration of how algorithm choice depends on input properties:
 
-- **Dataset A — Bubble Sort** wins, courtesy of the early-exit flag
+- **Dataset A: Bubble Sort** wins, courtesy of the early-exit flag
   catching the already-sorted input.
-- **Dataset B — Quick Sort** wins, courtesy of median-of-three pivots on
+- **Dataset B: Quick Sort** wins, courtesy of median-of-three pivots on
   random data.
-- **Dataset C — Merge Sort** wins, courtesy of stable, predictable
+- **Dataset C: Merge Sort** wins, courtesy of stable, predictable
   Θ(n log n) behaviour on tie-heavy data.
 
 ### Which algorithm behaves most consistently?
@@ -113,7 +113,7 @@ its number of comparisons per level is at most n, regardless of input.
 It has no best-case shortcut (unlike Bubble Sort's early-exit) and no
 pivot-selection variance (unlike Quick Sort).
 
-By contrast, Bubble Sort's spread is 0.103 to 3.169 ms (≈ 31×) — it is
+By contrast, Bubble Sort's spread is 0.103 to 3.169 ms (≈ 31×); it is
 the *least* consistent algorithm. Quick Sort's spread is 0.072 to
 0.159 ms (≈ 2.2×), close to Merge Sort but slightly more variable
 because pivot quality fluctuates with input.
@@ -123,8 +123,8 @@ because pivot quality fluctuates with input.
 ### If only one algorithm could be chosen for the final system
 
 We would choose **Quick Sort with median-of-three pivots**. The three
-selection criteria — best average runtime, most stable behaviour,
-simplest implementation — point in different directions, but in the
+selection criteria (best average runtime, most stable behaviour,
+simplest implementation) point in different directions, but in the
 context of the inspection system the priority order is:
 
 1. **Worst-case robustness over best-case speed.** The infrastructure
@@ -178,13 +178,13 @@ again wins, and the gap over Merge Sort widens.
 
 Merge Sort's main weakness for the inspection system is the O(n)
 auxiliary buffer; in a memory-constrained deployment (say, an embedded
-inspection terminal) this is a hard cap on the input size that can be
-sorted. Quick Sort, sorting in place with O(log n) recursion depth, has
-no such cap. The only Merge Sort advantage — stability — is irrelevant
-to this project because the `Candidate.RANKING` comparator is *total*:
-no two valid `Candidate` objects can compare equal under it (the
-locationId tiebreaker is unique). Stability would matter only if our
-ranking allowed ties, which it does not.
+inspection terminal) this caps the input size that can be sorted. Quick
+Sort, sorting in place with O(log n) recursion depth, has no such cap.
+The only Merge Sort advantage (stability) is irrelevant to this project
+because the `Candidate.RANKING` comparator is *total*: no two valid
+`Candidate` objects can compare equal under it, since the locationId
+tiebreaker is unique. Stability would matter only if our ranking allowed
+ties, which it does not.
 
-The conclusion: **Quick Sort with median-of-three is the runtime-and-
-memory optimum for the inspection system at any realistic scale.**
+**Quick Sort with median-of-three is therefore the runtime-and-memory
+optimum for the inspection system at any realistic scale.**
